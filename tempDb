@@ -1,0 +1,21 @@
+create database gametinhtoan;
+use gametinhtoan;
+
+create table taikhoan (
+	id int auto_increment primary key, 
+    username varchar(100) unique,
+    password varchar(255)
+)
+
+ALTER TABLE taikhoan ADD COLUMN score INT DEFAULT 0
+
+CREATE TABLE lichsu (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    taikhoan_id INT,
+    question VARCHAR(50),         -- ví dụ "2 + 3"
+    is_correct BOOLEAN,           -- đúng hay sai
+    score INT,                    -- điểm lần đó
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id)
+);
+

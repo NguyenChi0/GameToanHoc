@@ -5,6 +5,7 @@ const conn = require('./db');
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('frontend/public')); // Serve static files from frontend/public
 
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
@@ -45,7 +46,19 @@ app.get('/api/auth/get-score/:username', (req, res) => {
     });
 });
 
+// Endpoint để lấy danh sách ảnh
+app.get('/api/images', (req, res) => {
+    const query = 'SELECT number, image_path FROM number_images';
+    conn.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching images:', err);
+            return res.status(500).json({ message: 'Lỗi server khi lấy ảnh' });
+        }
+        res.json(results);
+    });
+});
+
 const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`🚀 Server is running on port ${PORT}`);
 });

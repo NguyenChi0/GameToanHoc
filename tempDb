@@ -1,0 +1,49 @@
+CREATE DATABASE gametoanhoc;
+USE gametoanhoc;
+
+-- 2. Bảng tài khoản người chơi
+CREATE TABLE taikhoan (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    score INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Bảng danh mục phép toán
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL        -- VD: "Tổng", "Hiệu", "Tích", "Thương", "Hỗn hợp"
+);
+
+-- 4. Bảng bài học
+CREATE TABLE lessons (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT,
+    name VARCHAR(100) NOT NULL,      -- VD: "Tổng trong phạm vi 10"
+    required_score INT DEFAULT 0,    -- Điểm cần để mở bài này
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+-- 5. Bảng kết quả học
+CREATE TABLE lesson_results (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    taikhoan_id INT,
+    lesson_id INT,
+    total_questions INT,       -- Tổng số câu
+    correct_answers INT,       -- Số câu đúng
+    total_score INT,           -- Tổng điểm
+    played_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id),
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id)
+);
+
+-- (Tùy chọn) 6. Bảng các bài học đã được mở khóa
+CREATE TABLE unlocked_lessons (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    taikhoan_id INT,
+    lesson_id INT,
+    unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id),
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id)
+);

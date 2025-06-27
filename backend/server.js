@@ -1,52 +1,26 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 const app = express();
-const conn = require('./db');
+require("dotenv").config();
+const conn = require("./db");
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('frontend/public')); // Serve static files from frontend/public
+app.use(express.static("frontend/public"));
 
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+const authRoutes = require("./routes/auth");
+const scoreRoutes = require("./routes/score");
+const categoryRoutes = require("./routes/categories");
+const lessonRoutes = require("./routes/lessons");
+const resultRoutes = require("./routes/results");
 
-// Endpoint để lưu điểm
-app.post('/api/auth/save-score', (req, res) => {
-    const { username, score } = req.body;
-    if (!username || score === undefined) {
-        return res.status(400).json({ message: 'Thiếu username hoặc score' });
-    }
+app.use("/api/auth", authRoutes);
+app.use("/api/score", scoreRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/lessons", lessonRoutes);
+app.use("/api/results", resultRoutes);
 
-    const query = 'UPDATE taikhoan SET score = ? WHERE username = ?';
-    conn.query(query, [score, username], (err, result) => {
-        if (err) {
-            console.error('Error updating score:', err);
-            return res.status(500).json({ message: 'Lỗi server khi lưu điểm' });
-        }
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
-        }
-        res.json({ message: 'Điểm đã được lưu thành công' });
-    });
-});
+app.get("/", (req, res) => res.send("Backend OK"));
 
-// Endpoint để lấy điểm
-app.get('/api/auth/get-score/:username', (req, res) => {
-    const { username } = req.params;
-    const query = 'SELECT score FROM taikhoan WHERE username = ?';
-    conn.query(query, [username], (err, results) => {
-        if (err) {
-            console.error('Error fetching score:', err);
-            return res.status(500).json({ message: 'Lỗi server khi lấy điểm' });
-        }
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
-        }
-        res.json({ score: results[0].score });
-    });
-});
-
-const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

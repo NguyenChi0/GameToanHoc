@@ -1,142 +1,152 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from "react";
 
 export default function Home({ username }) {
+  const [categories, setCategories] = useState([]);
+  const [lessons, setLessons] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedLesson, setSelectedLesson] = useState(null);
   const [score, setScore] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingScore, setLoadingScore] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedGame, setSelectedGame] = useState('United-1.html');
 
-  // Danh sách các game có sẵn
-  const games = [
-    { name: 'United Game 1', file: 'United-1.html', emoji: '🎮' },
-    { name: 'Untitled Game', file: 'Untitled-1.html', emoji: '🕹️' },
-    { name: 'Phép Chia Bảng Cửu Cửu', file: 'PhepChiaBangCuuCuu.html', emoji: '➗' },
-    { name: 'Phép Trừ Hai Chữ Số', file: 'PhepTruHaiChuSo.html', emoji: '➖' },
-    { name: 'Phép Trừ Một Chữ Số', file: 'PhepTruMotChuSo.html', emoji: '✖️' }
-  ];
+  // Lấy danh sách category
+  useEffect(() => {
+    fetch("http://localhost:5000/api/categories")
+      .then((res) => res.json())
+      .then(setCategories)
+      .catch((err) => console.error("Lỗi lấy categories:", err));
+  }, []);
 
+  // Lấy danh sách lesson theo category
+  useEffect(() => {
+    if (selectedCategory) {
+      fetch(`http://localhost:5000/api/lessons?category_id=${selectedCategory}`)
+        .then((res) => res.json())
+        .then(setLessons)
+        .catch((err) => console.error("Lỗi lấy lessons:", err));
+    } else {
+      setLessons([]);
+      setSelectedLesson(null);
+    }
+  }, [selectedCategory]);
+
+  // Lấy điểm người dùng
   useEffect(() => {
     if (username) {
-      const fetchScore = async () => {
-        try {
-          const response = await fetch(`http://localhost:5000/api/auth/get-score/${username}`);
-          const data = await response.json();
-          if (response.ok) {
-            setScore(data.score);
-          } else {
-            setError(data.message);
-          }
-        } catch (err) {
-          setError('Lỗi khi lấy điểm');
-          console.error('Error fetching score:', err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchScore();
+      fetch(`http://localhost:5000/api/auth/get-score/${username}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.score !== undefined) setScore(data.score);
+          else setError(data.message);
+        })
+        .catch(() => setError("Lỗi khi lấy điểm"))
+        .finally(() => setLoadingScore(false));
     } else {
-      setLoading(false);
+      setLoadingScore(false);
     }
   }, [username]);
 
-  const handleGameSelect = (gameFile) => {
-    setSelectedGame(gameFile);
-  };
-
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px' }}>
-      <h1>🏠 Trang chủ</h1>
-      
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+      <h1>📚 Game Học Toán</h1>
+
       {/* Thông tin người dùng */}
       {username ? (
-        <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-          <p>Xin chào, <strong>{username}</strong>!</p>
-          {loading ? (
+        <div
+          style={{
+            marginBottom: "20px",
+            backgroundColor: "#f0f8ff",
+            padding: "10px",
+            borderRadius: "8px",
+          }}
+        >
+          <p>
+            Xin chào, <strong>{username}</strong>!
+          </p>
+          {loadingScore ? (
             <p>Đang tải điểm...</p>
           ) : error ? (
-            <p style={{ color: 'red' }}>{error}</p>
+            <p style={{ color: "red" }}>{error}</p>
           ) : (
-            <p>Điểm của bạn: <strong>{score !== null ? score : '0'}</strong></p>
+            <p>
+              Điểm hiện tại: <strong>{score}</strong>
+            </p>
           )}
         </div>
       ) : (
-        <p style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#ffe6e6', borderRadius: '8px', color: '#d63031' }}>
-          Vui lòng đăng nhập để chơi game và lưu điểm.
-        </p>
+        <p style={{ color: "red" }}>Vui lòng đăng nhập để lưu điểm.</p>
       )}
 
-      {/* Chọn game */}
-      <div style={{ marginBottom: '20px' }}>
-        <h2>🎯 Chọn Game</h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-          {games.map((game, index) => (
+      {/* Chọn Category */}
+      <div>
+        <h2>📂 Chọn Phép Toán</h2>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+          {categories.map((cat) => (
             <button
-              key={index}
-              onClick={() => handleGameSelect(game.file)}
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
               style={{
-                padding: '10px 15px',
-                border: selectedGame === game.file ? '2px solid #0066cc' : '2px solid #ddd',
-                borderRadius: '8px',
-                backgroundColor: selectedGame === game.file ? '#e6f2ff' : '#fff',
-                color: selectedGame === game.file ? '#0066cc' : '#333',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: selectedGame === game.file ? 'bold' : 'normal',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseOver={(e) => {
-                if (selectedGame !== game.file) {
-                  e.target.style.backgroundColor = '#f0f0f0';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (selectedGame !== game.file) {
-                  e.target.style.backgroundColor = '#fff';
-                }
+                padding: "8px 12px",
+                backgroundColor:
+                  selectedCategory === cat.id ? "#e6f2ff" : "#fff",
+                border: "2px solid #0066cc",
+                borderRadius: "6px",
+                cursor: "pointer",
               }}
             >
-              {game.emoji} {game.name}
+              {cat.name}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Hiển thị game đã chọn */}
-      <div style={{ marginTop: '20px' }}>
-        <h3>🎮 Game hiện tại: {games.find(g => g.file === selectedGame)?.name}</h3>
-        <div style={{ 
-          height: '700px', 
-          border: '2px solid #ddd', 
-          borderRadius: '8px',
-          overflow: 'hidden',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-        }}>
-          <iframe
-            src={`/${selectedGame}`}
-            title={games.find(g => g.file === selectedGame)?.name || "Game"}
-            width="100%"
-            height="100%"
-            style={{ border: 'none' }}
-          />
+      {/* Chọn Lesson */}
+      {lessons.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+          <h2>📘 Chọn Bài Học</h2>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+            {lessons.map((lesson) => (
+              <button
+                key={lesson.id}
+                onClick={() => setSelectedLesson(lesson)}
+                style={{
+                  padding: "8px 12px",
+                  backgroundColor:
+                    selectedLesson?.id === lesson.id ? "#d1ffd1" : "#fff",
+                  border: "2px solid #00cc66",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                {lesson.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Hướng dẫn */}
-      <div style={{ 
-        marginTop: '20px', 
-        padding: '15px', 
-        backgroundColor: '#e8f4fd', 
-        borderRadius: '8px',
-        borderLeft: '4px solid #0066cc'
-      }}>
-        <h4>📋 Hướng dẫn:</h4>
-        <ul style={{ marginLeft: '20px' }}>
-          <li>Chọn game bạn muốn chơi từ danh sách trên</li>
-          <li>Game sẽ được tải trong khung bên dưới</li>
-          <li>Điểm số của bạn sẽ được lưu tự động (nếu đã đăng nhập)</li>
-          <li>Bạn có thể chuyển đổi giữa các game bất cứ lúc nào</li>
-        </ul>
-      </div>
+      {/* Hiển thị Game */}
+      {selectedLesson && (
+        <div style={{ marginTop: "30px" }}>
+          <h2>🎮 Đang chơi: {selectedLesson.name}</h2>
+          <div
+            style={{
+              height: "600px",
+              border: "2px solid #ccc",
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
+          >
+            <iframe
+              src={`/${selectedLesson.file}`}
+              title={selectedLesson.name}
+              width="100%"
+              height="100%"
+              style={{ border: "none" }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

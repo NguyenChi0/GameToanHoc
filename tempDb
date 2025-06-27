@@ -47,3 +47,15 @@ CREATE TABLE unlocked_lessons (
     FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id),
     FOREIGN KEY (lesson_id) REFERENCES lessons(id)
 );
+INSERT INTO categories (name) VALUES ('Tổng'), ('Hiệu'), ('Tích'), ('Thương'),('Hỗn hợp');
+
+ALTER TABLE lessons ADD COLUMN file VARCHAR(255);
+
+INSERT INTO lessons (category_id, name, required_score, file) VALUES
+(1, 'Tổng trong phạm vi 10', 0, 'United-1.html'),
+(1, 'Tổng trong phạm vi 20', 10, 'Untitled-1.html'),
+(2, 'Phép trừ một chữ số', 0, 'PhepTruMotChuSo.html'),
+(2, 'Phép trừ hai chữ số', 0, 'PhepTruHaiChuSo.html'),
+(4, 'Phép chia bảng cửu chương', 0, 'PhepChiaBangCuuChuong.html');
+
+

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Chia 3 Làn</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to right, #141e30, #243b55);
+      color: #fff;
+      overflow: hidden;
+    }
+    #game {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      background: #111;
+      overflow: hidden;
+      cursor: pointer;
+      display: none;
+    }
+    .lane {
+      position: absolute;
+      width: 100%;
+      height: 33.33%;
+      border-bottom: 1px solid #444;
+    }
+    .character {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: orange;
+      border-radius: 50%;
+      top: 0;
+      left: 50px;
+      transition: top 0.2s ease;
+    }
+    .obstacle {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: #555;
+      color: white;
+      border-radius: 10px;
+      text-align: center;
+      line-height: 60px;
+      font-size: 20px;
+      transition: left 0.1s linear;
+    }
+    .question {
+      text-align: center;
+      font-size: 24px;
+      padding: 10px;
+      background: #222;
+      display: none;
+    }
+    .score {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      background: #222;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: none;
+    }
+    .game-over, .game-win, .main-menu, .difficulty-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .game-over.show, .game-win.show, .main-menu.show, .difficulty-menu.show {
+      opacity: 1;
+    }
+    .main-menu { 
+      display: flex; 
+      opacity: 1;
+    }
+    .game-over h2 { 
+      color: #ff5555;
+      font-size: 48px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    .game-win h2 { 
+      color: #4CAF50;
+      font-size: 48px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    .main-menu h1, .difficulty-menu h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    .main-menu button, .game-over button, .game-win button, .difficulty-menu button {
+      padding: 15px 30px;
+      font-size: 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      margin: 10px;
+      min-width: 150px;
+    }
+    .main-menu button:hover, .game-over button:hover, .game-win button:hover, .difficulty-menu button:hover {
+      background: #45a049;
+      transform: scale(1.05);
+    }
+    .difficulty {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-size: 16px;
+      background: #222;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: none;
+    }
+    .difficulty select {
+      margin-left: 10px;
+      padding: 3px;
+      background: #333;
+      color: white;
+      border: 1px solid #444;
+    }
+    .final-score, .win-score {
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    .button-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-menu show" id="mainMenu">
+  <h1>Game Chia 3 Làn</h1>
+  <button onclick="showDifficultyMenu()">Bắt Đầu</button>
+</div>
+
+<div class="difficulty-menu" id="difficultyMenu">
+  <h2>Chọn Cấp Độ</h2>
+  <select id="difficulty">
+    <option value="easy">Dễ</option>
+    <option value="medium" selected>Vừa</option>
+    <option value="hard">Khó</option>
+  </select>
+  <div class="button-container">
+    <button onclick="startGame()">Chơi</button>
+    <button onclick="backToMainMenu()">Quay Lại</button>
+  </div>
+</div>
+
+<div class="question" id="question">Câu hỏi...</div>
+<div class="score" id="score">Điểm: 0</div>
+<div class="difficulty" id="difficultyDisplay">
+  Cấp độ: <span id="currentDifficulty">Vừa</span>
+</div>
+
+<div id="game">
+  <div class="lane" style="top: 0%;" onclick="moveToLane(0)"></div>
+  <div class="lane" style="top: 33.33%;" onclick="moveToLane(1)"></div>
+  <div class="lane" style="top: 66.66%;" onclick="moveToLane(2)"></div>
+  <div class="character" id="character"></div>
+</div>
+
+<div class="game-over" id="gameOver">
+  <h2>Game Over!</h2>
+  <p class="final-score" id="finalScore">Điểm cuối: 0</p>
+  <div class="button-container">
+    <button onclick="restartGame()">Chơi Lại</button>
+    <button onclick="backToMainMenu()">Menu</button>
+  </div>
+</div>
+
+<div class="game-win" id="gameWin">
+  <h2>Bạn Đã Chiến Thắng!</h2>
+  <p class="win-score" id="winScore">Điểm: 0</p>
+  <div class="button-container">
+    <button onclick="restartGame()">Chơi Lại</button>
+    <button onclick="backToMainMenu()">Menu</button>
+  </div>
+</div>
+
+<script>
+  const lanes = [0, 1, 2];
+  const laneHeight = 500 / 3;
+  const character = document.getElementById('character');
+  const game = document.getElementById('game');
+  const questionEl = document.getElementById('question');
+  const scoreEl = document.getElementById('score');
+  const gameOverEl = document.getElementById('gameOver');
+  const gameWinEl = document.getElementById('gameWin');
+  const finalScoreEl = document.getElementById('finalScore');
+  const winScoreEl = document.getElementById('winScore');
+  const difficultySelect = document.getElementById('difficulty');
+  const mainMenu = document.getElementById('mainMenu');
+  const difficultyMenu = document.getElementById('difficultyMenu');
+  const currentDifficulty = document.getElementById('currentDifficulty');
+  const difficultyDisplay = document.getElementById('difficultyDisplay');
+
+  let currentLane = 1;
+  let question = {};
+  let score = 0;
+  let baseSpeed = -0.3;
+  let gameSpeed = baseSpeed;
+  let gameActive = false;
+  let animationFrameId = null;
+
+  function setDifficulty() {
+    const difficulty = difficultySelect.value;
+    switch (difficulty) {
+      case 'easy':
+        baseSpeed = -0.2;
+        currentDifficulty.textContent = 'Dễ';
+        break;
+      case 'medium':
+        baseSpeed = -0.3;
+        currentDifficulty.textContent = 'Vừa';
+        break;
+      case 'hard':
+        baseSpeed = -0.5;
+        currentDifficulty.textContent = 'Khó';
+        break;
+    }
+    gameSpeed = baseSpeed;
+  }
+
+  function moveToLane(lane) {
+    if (!gameActive) return;
+    currentLane = lane;
+    character.style.top = `${lane * laneHeight + laneHeight / 2 - 25}px`;
+  }
+
+  function generateQuestion() {
+    let a = Math.floor(Math.random() * 9 + 1);
+    let b = Math.floor(Math.random() * 10 + 1);
+    let result = a * b;
+    let correct = b;
+
+    const wrong1 = correct + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 3 + 1);
+    const wrong2 = correct + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 3 + 2);
+    const answers = [correct, wrong1, wrong2].sort(() => Math.random() - 0.5);
+
+    question = { text: `${result} ÷ ${a} = ?`, correctAnswer: correct, answers };
+    questionEl.textContent = question.text;
+
+    document.querySelectorAll('.obstacle').forEach(o => o.remove());
+
+    answers.forEach((ans, index) => {
+      const obs = document.createElement('div');
+      obs.className = 'obstacle';
+      obs.innerText = ans;
+      obs.style.left = '100%';
+      obs.style.top = `${index * laneHeight + laneHeight / 2 - 30}px`;
+      obs.dataset.value = ans;
+      obs.dataset.lane = index;
+      game.appendChild(obs);
+    });
+  }
+
+  function hideAllScreens() {
+    mainMenu.style.display = 'none';
+    mainMenu.classList.remove('show');
+    difficultyMenu.style.display = 'none';
+    difficultyMenu.classList.remove('show');
+    gameOverEl.style.display = 'none';
+    gameOverEl.classList.remove('show');
+    gameWinEl.style.display = 'none';
+    gameWinEl.classList.remove('show');
+    game.style.display = 'none';
+    questionEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    difficultyDisplay.style.display = 'none';
+  }
+
+  function gameOver() {
+    gameActive = false;
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+    
+    finalScoreEl.textContent = `Điểm cuối: ${score}`;
+    
+    // Hide game elements
+    game.style.display = 'none';
+    questionEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    difficultyDisplay.style.display = 'none';
+    
+    // Show game over screen
+    gameOverEl.style.display = 'flex';
+    setTimeout(() => {
+      gameOverEl.classList.add('show');
+    }, 10);
+  }
+
+  function gameWin() {
+    gameActive = false;
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+    
+    winScoreEl.textContent = `Điểm: ${score}`;
+    
+    // Hide game elements
+    game.style.display = 'none';
+    questionEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    difficultyDisplay.style.display = 'none';
+    
+    // Show game win screen
+    gameWinEl.style.display = 'flex';
+    setTimeout(() => {
+      gameWinEl.classList.add('show');
+    }, 10);
+  }
+
+  function restartGame() {
+    hideAllScreens();
+    
+    // Reset game state
+    gameActive = true;
+    score = 0;
+    currentLane = 1;
+    scoreEl.textContent = `Điểm: ${score}`;
+    
+    // Show game elements
+    game.style.display = 'block';
+    questionEl.style.display = 'block';
+    scoreEl.style.display = 'block';
+    difficultyDisplay.style.display = 'block';
+    
+    // Reset difficulty and character position
+    setDifficulty();
+    moveToLane(1);
+    
+    // Clear obstacles and generate new question
+    document.querySelectorAll('.obstacle').forEach(o => o.remove());
+    generateQuestion();
+    
+    // Start game loop
+    gameSpeed = baseSpeed;
+    updateGame();
+  }
+
+  function showDifficultyMenu() {
+    hideAllScreens();
+    difficultyMenu.style.display = 'flex';
+    setTimeout(() => {
+      difficultyMenu.classList.add('show');
+    }, 10);
+  }
+
+  function backToMainMenu() {
+    hideAllScreens();
+    
+    // Stop game if running
+    gameActive = false;
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
+    
+    // Clear obstacles
+    document.querySelectorAll('.obstacle').forEach(o => o.remove());
+    
+    // Show main menu
+    mainMenu.style.display = 'flex';
+    setTimeout(() => {
+      mainMenu.classList.add('show');
+    }, 10);
+  }
+
+  function startGame() {
+    hideAllScreens();
+    
+    // Show game elements
+    game.style.display = 'block';
+    questionEl.style.display = 'block';
+    scoreEl.style.display = 'block';
+    difficultyDisplay.style.display = 'block';
+    
+    // Start the game
+    restartGame();
+  }
+
+  function updateGame() {
+    if (!gameActive) return;
+
+    const obstacles = document.querySelectorAll('.obstacle');
+    obstacles.forEach(obs => {
+      const obsX = parseFloat(obs.style.left) + gameSpeed;
+      obs.style.left = `${obsX}%`;
+
+      const obsLane = parseInt(obs.dataset.lane);
+      const characterX = 50;
+      const obsXpx = obsX * window.innerWidth / 100;
+
+      if (obsLane === currentLane && obsXpx < characterX + 50 && obsXpx + 60 > characterX) {
+        const val = parseInt(obs.dataset.value);
+        if (val === question.correctAnswer) {
+          score++;
+          scoreEl.textContent = `Điểm: ${score}`;
+          gameSpeed = baseSpeed * (1 - score * 0.05);
+          if (score >= 5) {
+            gameWin();
+            return;
+          } else {
+            generateQuestion();
+          }
+        } else {
+          gameOver();
+          return;
+        }
+      } else if (obsX < -10) {
+        obs.remove();
+      }
+    });
+
+    animationFrameId = requestAnimationFrame(updateGame);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (!gameActive) return;
+    if (e.key === 'ArrowUp' && currentLane > 0) moveToLane(currentLane - 1);
+    if (e.key === 'ArrowDown' && currentLane < 2) moveToLane(currentLane + 1);
+  });
+
+  // Initialize character position
+  moveToLane(1);
+</script>
+
+</body>
+</html>

@@ -46,18 +46,6 @@ app.get('/api/auth/get-score/:username', (req, res) => {
     });
 });
 
-// Endpoint để lấy danh sách ảnh
-app.get('/api/images', (req, res) => {
-    const query = 'SELECT number, image_path FROM number_images';
-    conn.query(query, (err, results) => {
-        if (err) {
-            console.error('Error fetching images:', err);
-            return res.status(500).json({ message: 'Lỗi server khi lấy ảnh' });
-        }
-        res.json(results);
-    });
-});
-
 const PORT = 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);

@@ -27,6 +27,23 @@ router.post("/", (req, res) => {
   );
 });
 
+//Cập nhật category
+router.put("/:id", (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ message: "Thiếu tên category" });
+
+  conn.query(
+    "UPDATE categories SET name = ? WHERE id = ?",
+    [name, id],
+    (err, result) => {
+      if (err)
+        return res.status(500).json({ message: "Lỗi khi cập nhật category" });
+      res.json({ message: "Đã cập nhật category" });
+    }
+  );
+});
+
 // Xoá category
 router.delete("/:id", (req, res) => {
   const { id } = req.params;

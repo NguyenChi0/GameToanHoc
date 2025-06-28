@@ -105,29 +105,38 @@ export default function Admin() {
   };
 
   return (
-    <div style={{ padding: 20, fontFamily: "Arial" }}>
-      <h1>🛠️ Trang Quản Trị</h1>
+    <div
+      style={{
+        padding: 20,
+        fontFamily: "Arial",
+        maxWidth: 1000,
+        margin: "0 auto",
+      }}
+    >
+      <h1 style={{ textAlign: "center" }}>🛠️ Trang Quản Trị</h1>
 
-      {/* Category Section */}
-      <div style={{ marginBottom: 30 }}>
+      <div style={{ marginBottom: 40 }}>
         <h2>📁 Quản lý Category</h2>
-        <input
-          type="text"
-          placeholder="Tên category"
-          value={category.name}
-          onChange={(e) => setCategory({ ...category, name: e.target.value })}
-          style={{ padding: 8, marginRight: 10 }}
-        />
+        <div style={{ marginBottom: 10 }}>
+          <label>Tên danh mục:</label>
+          <br />
+          <input
+            type="text"
+            value={category.name}
+            onChange={(e) => setCategory({ ...category, name: e.target.value })}
+            style={{ padding: 8, width: "100%" }}
+          />
+        </div>
         {category.id ? (
           <button onClick={handleUpdateCategory}>Cập nhật Category</button>
         ) : (
           <button onClick={handleAddCategory}>Thêm Category</button>
         )}
 
-        <ul>
+        <ul style={{ marginTop: 20 }}>
           {categories.map((cat) => (
             <li key={cat.id} style={{ marginTop: 8 }}>
-              {cat.name}
+              📁 {cat.name}
               <button
                 onClick={() => handleEditCategory(cat)}
                 style={{ marginLeft: 10 }}
@@ -138,106 +147,124 @@ export default function Admin() {
                 onClick={() => handleDeleteCategory(cat.id)}
                 style={{ marginLeft: 10, color: "red" }}
               >
-                Xóa
+                Xoá
               </button>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Lesson Section */}
-      <div style={{ marginBottom: 30 }}>
+      <div style={{ marginBottom: 40 }}>
         <h2>📘 Quản lý Bài Học</h2>
-        <select
-          value={lesson.category_id}
-          onChange={(e) =>
-            setLesson({ ...lesson, category_id: e.target.value })
-          }
-          style={{ padding: 8, marginRight: 10 }}
-        >
-          <option value="">-- Chọn Category --</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="text"
-          placeholder="Tên bài học"
-          value={lesson.name}
-          onChange={(e) => setLesson({ ...lesson, name: e.target.value })}
-          style={{ padding: 8, marginRight: 10 }}
-        />
-
-        <input
-          type="number"
-          placeholder="Điểm yêu cầu"
-          value={lesson.required_score}
-          onChange={(e) =>
-            setLesson({ ...lesson, required_score: Number(e.target.value) })
-          }
-          style={{ padding: 8, marginRight: 10, width: 120 }}
-        />
-
-        <input
-          type="text"
-          placeholder="Tên file HTML (ví dụ: game1.html)"
-          value={lesson.file}
-          onChange={(e) => setLesson({ ...lesson, file: e.target.value })}
-          style={{ padding: 8, marginRight: 10 }}
-        />
-
-        <input
-          type="text"
-          placeholder="Link ảnh (tuỳ chọn)"
-          value={lesson.image}
-          onChange={(e) => setLesson({ ...lesson, image: e.target.value })}
-          style={{ padding: 8, marginRight: 10 }}
-        />
-
-        {lesson.id ? (
-          <button onClick={handleUpdateLesson}>Cập Nhật Bài Học</button>
-        ) : (
-          <button onClick={handleAddLesson}>Thêm Bài Học</button>
-        )}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+          <div style={{ flex: "1 1 30%" }}>
+            <label>Chọn danh mục:</label>
+            <br />
+            <select
+              value={lesson.category_id}
+              onChange={(e) =>
+                setLesson({ ...lesson, category_id: e.target.value })
+              }
+              style={{ padding: 8, width: "100%" }}
+            >
+              <option value="">-- Chọn Category --</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div style={{ flex: "1 1 30%" }}>
+            <label>Tên bài học:</label>
+            <br />
+            <input
+              type="text"
+              value={lesson.name}
+              onChange={(e) => setLesson({ ...lesson, name: e.target.value })}
+              style={{ padding: 8, width: "100%" }}
+            />
+          </div>
+          <div style={{ flex: "1 1 30%" }}>
+            <label>Điểm yêu cầu:</label>
+            <br />
+            <input
+              type="number"
+              value={lesson.required_score}
+              onChange={(e) =>
+                setLesson({ ...lesson, required_score: Number(e.target.value) })
+              }
+              style={{ padding: 8, width: "100%" }}
+            />
+          </div>
+          <div style={{ flex: "1 1 30%" }}>
+            <label>Tên file HTML:</label>
+            <br />
+            <input
+              type="text"
+              value={lesson.file}
+              onChange={(e) => setLesson({ ...lesson, file: e.target.value })}
+              style={{ padding: 8, width: "100%" }}
+            />
+          </div>
+          <div style={{ flex: "1 1 30%" }}>
+            <label>Link ảnh minh hoạ:</label>
+            <br />
+            <input
+              type="text"
+              value={lesson.image}
+              onChange={(e) => setLesson({ ...lesson, image: e.target.value })}
+              style={{ padding: 8, width: "100%" }}
+            />
+          </div>
+        </div>
+        <div style={{ marginTop: 20 }}>
+          {lesson.id ? (
+            <button onClick={handleUpdateLesson}>Cập nhật Bài học</button>
+          ) : (
+            <button onClick={handleAddLesson}>Thêm Bài học</button>
+          )}
+        </div>
       </div>
 
       <div>
-        <h3>📋 Danh sách bài học (theo từng Category)</h3>
+        <h3>📋 Danh sách bài học theo danh mục</h3>
         {categories.map((cat) => (
-          <div key={cat.id} style={{ marginBottom: 20 }}>
+          <div key={cat.id} style={{ marginBottom: 30 }}>
             <h4>📁 {cat.name}</h4>
             <ul>
               {lessons
                 .filter((l) => l.category_id === cat.id)
                 .map((item) => (
                   <li key={item.id} style={{ marginBottom: 10 }}>
-                    📘 {item.name} - File: {item.file} - Điểm yêu cầu:{" "}
-                    {item.required_score}
+                    <strong>📘 {item.name}</strong> - File: <em>{item.file}</em>{" "}
+                    - Điểm yêu cầu: {item.required_score}
                     {item.image && (
                       <div>
+                        <span>🖼️ Hình ảnh minh hoạ:</span>
+                        <br />
                         <img
                           src={item.image}
                           alt="preview"
-                          width="100"
+                          width="120"
                           style={{ marginTop: 5 }}
                         />
                       </div>
                     )}
-                    <button
-                      onClick={() => handleEditLesson(item)}
-                      style={{ marginLeft: 10 }}
-                    >
-                      Sửa
-                    </button>
-                    <button
-                      onClick={() => handleDeleteLesson(item.id)}
-                      style={{ marginLeft: 10, color: "red" }}
-                    >
-                      Xoá
-                    </button>
+                    <div>
+                      <button
+                        onClick={() => handleEditLesson(item)}
+                        style={{ marginTop: 5, marginRight: 10 }}
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        onClick={() => handleDeleteLesson(item.id)}
+                        style={{ color: "red" }}
+                      >
+                        Xoá
+                      </button>
+                    </div>
                   </li>
                 ))}
             </ul>

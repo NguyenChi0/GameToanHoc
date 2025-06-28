@@ -57,5 +57,3 @@ INSERT INTO lessons (category_id, name, required_score, file) VALUES
 (2, 'Phép trừ một chữ số', 0, 'PhepTruMotChuSo.html'),
 (2, 'Phép trừ hai chữ số', 0, 'PhepTruHaiChuSo.html'),
 (4, 'Phép chia bảng cửu chương', 0, 'PhepChiaBangCuuChuong.html');
-
-

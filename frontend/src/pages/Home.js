@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Home({ username }) {
   const [categories, setCategories] = useState([]);
   const [lessons, setLessons] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedLesson, setSelectedLesson] = useState(null);
   const [score, setScore] = useState(null);
   const [loadingScore, setLoadingScore] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Lấy danh sách category
   useEffect(() => {
@@ -17,21 +17,16 @@ export default function Home({ username }) {
       .catch((err) => console.error("Lỗi lấy categories:", err));
   }, []);
 
-  // Lấy danh sách lesson theo category
+  // Lấy tất cả lessons
   useEffect(() => {
-    if (selectedCategory) {
-      fetch(`http://localhost:5000/api/lessons?category_id=${selectedCategory}`)
-        .then((res) => res.json())
-        .then(setLessons)
-        .catch((err) => console.error("Lỗi lấy lessons:", err));
-    } else {
-      setLessons([]);
-      setSelectedLesson(null);
-    }
-  }, [selectedCategory]);
+    fetch("http://localhost:5000/api/lessons")
+      .then((res) => res.json())
+      .then(setLessons)
+      .catch((err) => console.error("Lỗi lấy lessons:", err));
+  }, []);
 
   // Lấy điểm người dùng
-  useEffect(() => {
+  const fetchScore = () => {
     if (username) {
       fetch(`http://localhost:5000/api/score/${username}`)
         .then((res) => res.json())
@@ -44,6 +39,10 @@ export default function Home({ username }) {
     } else {
       setLoadingScore(false);
     }
+  };
+
+  useEffect(() => {
+    fetchScore();
   }, [username]);
 
   return (
@@ -77,76 +76,44 @@ export default function Home({ username }) {
         <p style={{ color: "red" }}>Vui lòng đăng nhập để lưu điểm.</p>
       )}
 
-      {/* Chọn Category */}
+      {/* Hiển thị danh sách Category và bài học */}
       <div>
-        <h2>📂 Chọn Phép Toán</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
+        {categories.map((cat) => (
+          <div key={cat.id} style={{ marginBottom: "30px" }}>
+            <h2>📂 {cat.name}</h2>
+            <div
               style={{
-                padding: "8px 12px",
-                backgroundColor:
-                  selectedCategory === cat.id ? "#e6f2ff" : "#fff",
-                border: "2px solid #0066cc",
-                borderRadius: "6px",
-                cursor: "pointer",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
+                padding: "10px",
+                backgroundColor: "#f9f9f9",
+                borderRadius: "8px",
               }}
             >
-              {cat.name}
-            </button>
-          ))}
-        </div>
+              {lessons
+                .filter((l) => l.category_id === cat.id)
+                .map((lesson) => (
+                  <div
+                    key={lesson.id}
+                    onClick={() => navigate("/game", { state: lesson })}
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #00cc66",
+                      borderRadius: "6px",
+                      minWidth: "200px",
+                      cursor: "pointer",
+                      backgroundColor: "#fff",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <strong>{lesson.name}</strong>
+                  </div>
+                ))}
+            </div>
+          </div>
+        ))}
       </div>
-
-      {/* Chọn Lesson */}
-      {lessons.length > 0 && (
-        <div style={{ marginTop: "20px" }}>
-          <h2>📘 Chọn Bài Học</h2>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-            {lessons.map((lesson) => (
-              <button
-                key={lesson.id}
-                onClick={() => setSelectedLesson(lesson)}
-                style={{
-                  padding: "8px 12px",
-                  backgroundColor:
-                    selectedLesson?.id === lesson.id ? "#d1ffd1" : "#fff",
-                  border: "2px solid #00cc66",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                }}
-              >
-                {lesson.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Hiển thị Game */}
-      {selectedLesson && (
-        <div style={{ marginTop: "30px" }}>
-          <h2>🎮 Đang chơi: {selectedLesson.name}</h2>
-          <div
-            style={{
-              height: "600px",
-              border: "2px solid #ccc",
-              borderRadius: "8px",
-              overflow: "hidden",
-            }}
-          >
-            <iframe
-              src={`/${selectedLesson.file}`}
-              title={selectedLesson.name}
-              width="100%"
-              height="100%"
-              style={{ border: "none" }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import {
   Link,
   useNavigate,
 } from "react-router-dom";
-
+import GamePage from "./pages/GamePage";
 import Home from "./pages/Home";
 import DangNhap from "./pages/DangNhap";
 import DangKy from "./pages/Dangky";
@@ -53,7 +53,8 @@ function App() {
         <Route path="/" element={<Home username={username} />} />
         <Route path="/login" element={<DangNhap setUsername={setUsername} />} />
         <Route path="/register" element={<DangKy />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<Admin />} />{" "}
+        <Route path="/game" element={<GamePage />} />
       </Routes>
     </BrowserRouter>
   );

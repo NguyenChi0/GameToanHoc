@@ -22,6 +22,7 @@ CREATE TABLE lessons (
     category_id INT,
     name VARCHAR(100) NOT NULL,      -- VD: "Tổng trong phạm vi 10"
     required_score INT DEFAULT 0,    -- Điểm cần để mở bài này
+	file VARCHAR(255),
     FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
@@ -47,13 +48,26 @@ CREATE TABLE unlocked_lessons (
     FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id),
     FOREIGN KEY (lesson_id) REFERENCES lessons(id)
 );
+
 INSERT INTO categories (name) VALUES ('Tổng'), ('Hiệu'), ('Tích'), ('Thương'),('Hỗn hợp');
 
-ALTER TABLE lessons ADD COLUMN file VARCHAR(255);
-
 INSERT INTO lessons (category_id, name, required_score, file) VALUES
-(1, 'Tổng trong phạm vi 10', 0, 'United-1.html'),
-(1, 'Tổng trong phạm vi 20', 10, 'Untitled-1.html'),
-(2, 'Phép trừ một chữ số', 0, 'PhepTruMotChuSo.html'),
-(2, 'Phép trừ hai chữ số', 0, 'PhepTruHaiChuSo.html'),
-(4, 'Phép chia bảng cửu chương', 0, 'PhepChiaBangCuuChuong.html');
+(1, 'Tổng các phép toán 1 chữ số', 10, 'Tong1cs.html'),
+(1, 'Tổng các phép toán 2 chữ só', 10, 'Tong2cs.html'),
+(1, 'Tổng các phép toán 3 chữ số', 10, 'Tong3cs.html'),
+(2, 'Hiệu các phép toán 1 chữ số', 10, 'Hieu1cs.html'),
+(2, 'Hiệu các phép toán 2 chữ số', 10, 'Hieu2cs.html'),
+(2, 'Hiệu các phép toán 3 chữ số', 10, 'Hieu3cs.html'),
+(3, 'Tích các phép toán 1 chữ số', 10, 'Tich1cs.html'),
+(3, 'Tích các phép toán 2 chữ số', 10, 'Tich2cs.html'),
+(3, 'Tích các phép toán 3 chữ số', 10, 'Tich3cs.html'),
+(4, 'Thương các phép toán 1 chữ số', 10, 'Thuong1cs.html'),
+(4, 'Thương các phép toán 2 chữ số', 10, 'Thuong2cs.html'),
+(4, 'Thương các phép toán 3 chữ số', 10, 'Thuong3cs.html'),
+(5, 'Hỗn hợp các phép toán 1 chữ số', 10, 'Honhop1cs.html'),
+(5, 'Hỗn hợp các phép toán 2 chữ số', 10, 'Honhop2cs.html'),
+(5, 'Hỗn hợp các phép toán 3 chữ số', 10, 'Honhop3cs.html');
+
+
+select * from lessons
+select * from categories

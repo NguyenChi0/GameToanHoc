@@ -33,7 +33,7 @@ export default function Home({ username }) {
   // Lấy điểm người dùng
   useEffect(() => {
     if (username) {
-      fetch(`http://localhost:5000/api/auth/get-score/${username}`)
+      fetch(`http://localhost:5000/api/score/${username}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.score !== undefined) setScore(data.score);

@@ -10,8 +10,9 @@ export default function Admin() {
     category_id: "",
     name: "",
     required_score: 0,
-    file: "",
-    image: "",
+    operation: "",
+    level: 1,
+    type: "arithmetic",
   });
   const [lessons, setLessons] = useState([]);
 
@@ -59,8 +60,9 @@ export default function Admin() {
   };
 
   const handleAddLesson = async () => {
-    const { category_id, name, required_score, file, image } = lesson;
-    if (!category_id || !name || !file)
+    const { category_id, name, required_score, operation, level, type } =
+      lesson;
+    if (!category_id || !name || !operation)
       return alert("Điền đầy đủ thông tin bài học");
     if (required_score < 0) return alert("Điểm yêu cầu không hợp lệ");
     await axios.post("http://localhost:5000/api/lessons", lesson);
@@ -69,8 +71,9 @@ export default function Admin() {
       category_id: "",
       name: "",
       required_score: 0,
-      file: "",
-      image: "",
+      operation: "",
+      level: 1,
+      type: "arithmetic",
     });
     fetchLessons();
     alert("✅ Thêm bài học thành công!");
@@ -87,8 +90,9 @@ export default function Admin() {
   };
 
   const handleUpdateLesson = async () => {
-    const { id, category_id, name, required_score, file, image } = lesson;
-    if (!id || !category_id || !name || !file)
+    const { id, category_id, name, required_score, operation, level, type } =
+      lesson;
+    if (!id || !category_id || !name || !operation)
       return alert("Thiếu thông tin để cập nhật");
     if (required_score < 0) return alert("Điểm yêu cầu không hợp lệ");
     await axios.put(`http://localhost:5000/api/lessons/${id}`, lesson);
@@ -97,8 +101,9 @@ export default function Admin() {
       category_id: "",
       name: "",
       required_score: 0,
-      file: "",
-      image: "",
+      operation: "",
+      level: 1,
+      type: "arithmetic",
     });
     fetchLessons();
     alert("✅ Cập nhật thành công!");
@@ -198,24 +203,42 @@ export default function Admin() {
             />
           </div>
           <div style={{ flex: "1 1 30%" }}>
-            <label>Tên file HTML:</label>
+            <label>Phép toán (operation):</label>
             <br />
             <input
               type="text"
-              value={lesson.file}
-              onChange={(e) => setLesson({ ...lesson, file: e.target.value })}
+              value={lesson.operation}
+              onChange={(e) =>
+                setLesson({ ...lesson, operation: e.target.value })
+              }
               style={{ padding: 8, width: "100%" }}
+              placeholder="VD: add, subtract, compare"
             />
           </div>
           <div style={{ flex: "1 1 30%" }}>
-            <label>Link ảnh minh hoạ:</label>
+            <label>Cấp độ (level):</label>
             <br />
             <input
-              type="text"
-              value={lesson.image}
-              onChange={(e) => setLesson({ ...lesson, image: e.target.value })}
+              type="number"
+              value={lesson.level}
+              onChange={(e) =>
+                setLesson({ ...lesson, level: Number(e.target.value) })
+              }
               style={{ padding: 8, width: "100%" }}
+              min="1"
             />
+          </div>
+          <div style={{ flex: "1 1 30%" }}>
+            <label>Loại (type):</label>
+            <br />
+            <select
+              value={lesson.type}
+              onChange={(e) => setLesson({ ...lesson, type: e.target.value })}
+              style={{ padding: 8, width: "100%" }}
+            >
+              <option value="arithmetic">Số học</option>
+              <option value="visual">Hình ảnh</option>
+            </select>
           </div>
         </div>
         <div style={{ marginTop: 20 }}>
@@ -237,20 +260,9 @@ export default function Admin() {
                 .filter((l) => l.category_id === cat.id)
                 .map((item) => (
                   <li key={item.id} style={{ marginBottom: 10 }}>
-                    <strong>📘 {item.name}</strong> - File: <em>{item.file}</em>{" "}
-                    - Điểm yêu cầu: {item.required_score}
-                    {item.image && (
-                      <div>
-                        <span>🖼️ Hình ảnh minh hoạ:</span>
-                        <br />
-                        <img
-                          src={item.image}
-                          alt="preview"
-                          width="120"
-                          style={{ marginTop: 5 }}
-                        />
-                      </div>
-                    )}
+                    <strong>📘 {item.name}</strong> - Phép toán:{" "}
+                    {item.operation} - Level: {item.level} - Type: {item.type} -
+                    Điểm yêu cầu: {item.required_score}
                     <div>
                       <button
                         onClick={() => handleEditLesson(item)}

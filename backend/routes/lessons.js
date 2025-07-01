@@ -38,15 +38,15 @@ router.get("/:id", (req, res) => {
 
 // Thêm bài học mới
 router.post("/", (req, res) => {
-  const { category_id, name, required_score, file, operation, level, type } =
+  const { category_id, name, required_score, operation, level, type } =
     req.body;
 
   if (!category_id || !name)
     return res.status(400).json({ message: "Thiếu dữ liệu bắt buộc" });
 
   const sql = `
-    INSERT INTO lessons (category_id, name, required_score, file, operation, level, type)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO lessons (category_id, name, required_score, operation, level, type)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
   conn.query(
@@ -55,7 +55,6 @@ router.post("/", (req, res) => {
       category_id,
       name,
       required_score || 0,
-      file || null,
       operation || null,
       level || 1,
       type || "arithmetic",
@@ -70,7 +69,7 @@ router.post("/", (req, res) => {
 // Cập nhật bài học
 router.put("/:id", (req, res) => {
   const { id } = req.params;
-  const { category_id, name, required_score, file, operation, level, type } =
+  const { category_id, name, required_score, operation, level, type } =
     req.body;
 
   const sql = `
@@ -78,7 +77,6 @@ router.put("/:id", (req, res) => {
       category_id=?, 
       name=?, 
       required_score=?, 
-      file=?, 
       operation=?, 
       level=?, 
       type=?
@@ -87,7 +85,7 @@ router.put("/:id", (req, res) => {
 
   conn.query(
     sql,
-    [category_id, name, required_score, file, operation, level, type, id],
+    [category_id, name, required_score, operation, level, type, id],
     (err, result) => {
       if (err)
         return res.status(500).json({ message: "Lỗi khi cập nhật bài học" });

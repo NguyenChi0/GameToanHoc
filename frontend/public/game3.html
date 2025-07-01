@@ -1,0 +1,67 @@
+<!-- game3.html -->
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Game 3</title>
+    <script>
+      function getParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+          op: params.get("op"),
+          level: parseInt(params.get("level")) || 1,
+        };
+      }
+
+      function generateQuestion(op, level) {
+        const max = level * 5;
+        const a = Math.floor(Math.random() * max) + 1;
+        const b = Math.floor(Math.random() * max) + 1;
+        let question = `${a} + ${b}`;
+        let answer = a + b;
+        const params = new URLSearchParams(window.location.search);
+        const lessonName = params.get("lessonName") || "Game Toán Học";
+        document.title = lessonName;
+        document.querySelector("h1") &&
+          (document.querySelector("h1").textContent = lessonName);
+
+        if (op === "subtract") {
+          question = `${a} - ${b}`;
+          answer = a - b;
+        } else if (op === "multiply") {
+          question = `${a} x ${b}`;
+          answer = a * b;
+        } else if (op === "divide") {
+          question = `${a * b} : ${b}`;
+          answer = a;
+        }
+        return { question, answer };
+      }
+
+      window.onload = () => {
+        const { op, level } = getParams();
+        const { question, answer } = generateQuestion(op, level);
+        document.getElementById("question").innerText = `Câu hỏi: ${question}`;
+
+        document.getElementById("submitBtn").onclick = () => {
+          const userAns = parseInt(document.getElementById("inputAns").value);
+          const feedback = document.getElementById("feedback");
+          if (userAns === answer) {
+            feedback.innerText = "🎉 Tuyệt vời! Đúng rồi";
+            feedback.style.color = "green";
+          } else {
+            feedback.innerText = `😢 Sai mất rồi. Kết quả đúng là ${answer}`;
+            feedback.style.color = "red";
+          }
+        };
+      };
+    </script>
+  </head>
+  <body style="padding: 40px; background-color: #eef7ff">
+    <h2>🧠 Game 3 - Tính nhanh</h2>
+    <p id="question" style="font-size: 20px"></p>
+    <input type="number" id="inputAns" placeholder="Đáp án của bạn" />
+    <button id="submitBtn">Gửi</button>
+    <div id="feedback" style="margin-top: 20px; font-weight: bold"></div>
+  </body>
+</html>

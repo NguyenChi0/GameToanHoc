@@ -54,7 +54,7 @@ function App() {
         <Route path="/login" element={<DangNhap setUsername={setUsername} />} />
         <Route path="/register" element={<DangKy />} />
         <Route path="/admin" element={<Admin />} />{" "}
-        <Route path="/game" element={<GamePage />} />
+        <Route path="/game/:lessonId" element={<GamePage />} />
       </Routes>
     </BrowserRouter>
   );

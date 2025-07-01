@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Toán Học - Mẫu</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 40px;
+      }
+      .question {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+      .input-area input {
+        font-size: 20px;
+        padding: 8px;
+      }
+      .btn {
+        padding: 8px 16px;
+        font-size: 18px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+      .result {
+        font-size: 20px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎲 Game Toán Học</h1>
+    <div class="question" id="question">Đang tải câu hỏi...</div>
+    <div class="input-area">
+      <input type="number" id="answer" placeholder="Nhập kết quả" />
+      <button class="btn" onclick="checkAnswer()">Kiểm tra</button>
+    </div>
+    <div class="result" id="result"></div>
+
+    <script>
+      function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+          operation: params.get("op") || "add",
+          level: parseInt(params.get("level")) || 1,
+        };
+      }
+
+      const { operation, level } = getQueryParams();
+      const params = new URLSearchParams(window.location.search);
+      const lessonName = params.get("lessonName") || "Game Toán Học";
+      document.title = lessonName;
+      document.querySelector("h1") &&
+        (document.querySelector("h1").textContent = lessonName);
+
+      let currentCorrectAnswer = 0;
+
+      function generateQuestion() {
+        const max = level === 1 ? 9 : level === 2 ? 99 : 999;
+        let a = Math.floor(Math.random() * max) + 1;
+        let b = Math.floor(Math.random() * max) + 1;
+
+        let questionText = "";
+        switch (operation) {
+          case "add":
+            currentCorrectAnswer = a + b;
+            questionText = `${a} + ${b} = ?`;
+            break;
+          case "subtract":
+            currentCorrectAnswer = a - b;
+            questionText = `${a} - ${b} = ?`;
+            break;
+          case "multiply":
+            currentCorrectAnswer = a * b;
+            questionText = `${a} × ${b} = ?`;
+            break;
+          case "divide":
+            b = b || 1;
+            currentCorrectAnswer = a;
+            questionText = `${a * b} ÷ ${b} = ?`;
+            break;
+          default:
+            currentCorrectAnswer = a + b;
+            questionText = `${a} + ${b} = ?`;
+        }
+
+        document.getElementById("question").textContent = questionText;
+        document.getElementById("answer").value = "";
+        document.getElementById("result").textContent = "";
+      }
+
+      function checkAnswer() {
+        const userAnswer = parseInt(document.getElementById("answer").value);
+        const resultDiv = document.getElementById("result");
+        if (userAnswer === currentCorrectAnswer) {
+          resultDiv.textContent = "✅ Chính xác!";
+          resultDiv.style.color = "green";
+        } else {
+          resultDiv.textContent = `❌ Sai rồi. Đáp án đúng là ${currentCorrectAnswer}.`;
+          resultDiv.style.color = "red";
+        }
+        setTimeout(generateQuestion, 1500);
+      }
+
+      // Khởi tạo câu hỏi đầu tiên
+      generateQuestion();
+    </script>
+  </body>
+</html>

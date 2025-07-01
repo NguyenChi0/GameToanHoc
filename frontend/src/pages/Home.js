@@ -9,6 +9,19 @@ export default function Home({ username }) {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Ánh xạ operation → các game phù hợp
+  const operationToGames = {
+    add: ["game1.html", "game2.html"],
+    subtract: ["game1.html", "game3.html"],
+    multiply: ["game2.html", "game3.html"],
+    divide: ["game1.html"],
+    count: ["game2.html"],
+    compare: ["game3.html"],
+    order: ["game1.html", "game2.html"],
+    // Mặc định nếu không có operation
+    default: ["game1.html", "game2.html", "game3.html"],
+  };
+
   // Lấy danh sách category
   useEffect(() => {
     fetch("http://localhost:5000/api/categories")
@@ -96,7 +109,31 @@ export default function Home({ username }) {
                 .map((lesson) => (
                   <div
                     key={lesson.id}
-                    onClick={() => navigate("/game", { state: lesson })}
+                    onClick={() => {
+                      if (lesson.type === "visual") {
+                        // Xử lý game dạng hình ảnh nếu có
+                        navigate(`/visual/${lesson.id}`, {
+                          state: {
+                            lessonName: lesson.name,
+                          },
+                        });
+                      } else {
+                        // Chọn random 1 game phù hợp
+                        const list =
+                          operationToGames[lesson.operation] ||
+                          operationToGames.default;
+                        const randomGame =
+                          list[Math.floor(Math.random() * list.length)];
+                        navigate(`/game/${lesson.id}`, {
+                          state: {
+                            game: randomGame,
+                            operation: lesson.operation,
+                            level: lesson.level,
+                            lessonName: lesson.name,
+                          },
+                        });
+                      }
+                    }}
                     style={{
                       padding: "12px",
                       border: "1px solid #00cc66",

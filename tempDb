@@ -22,6 +22,10 @@ CREATE TABLE lessons (
     category_id INT,
     name VARCHAR(100) NOT NULL,      -- VD: "Tổng trong phạm vi 10"
     required_score INT DEFAULT 0,    -- Điểm cần để mở bài này
+	file VARCHAR(255),
+    operation VARCHAR(50),     -- VD: 'add', 'subtract', 'count', 'compare', 'order'
+    level INT DEFAULT 1,       -- Mức độ bài học (1 chữ số, 2 chữ số,...)
+    type VARCHAR(20) DEFAULT 'arithmetic', -- 'arithmetic' hoặc 'visual'
     FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
@@ -47,13 +51,57 @@ CREATE TABLE unlocked_lessons (
     FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id),
     FOREIGN KEY (lesson_id) REFERENCES lessons(id)
 );
-INSERT INTO categories (name) VALUES ('Tổng'), ('Hiệu'), ('Tích'), ('Thương'),('Hỗn hợp');
 
-ALTER TABLE lessons ADD COLUMN file VARCHAR(255);
+INSERT INTO categories (name) VALUES
+('Tổng'),
+('Hiệu'),
+('Tích'),
+('Thương'),
+('Hỗn hợp'),
+('Hình ảnh');
 
-INSERT INTO lessons (category_id, name, required_score, file) VALUES
-(1, 'Tổng trong phạm vi 10', 0, 'United-1.html'),
-(1, 'Tổng trong phạm vi 20', 10, 'Untitled-1.html'),
-(2, 'Phép trừ một chữ số', 0, 'PhepTruMotChuSo.html'),
-(2, 'Phép trừ hai chữ số', 0, 'PhepTruHaiChuSo.html'),
-(4, 'Phép chia bảng cửu chương', 0, 'PhepChiaBangCuuChuong.html');
+-- Tổng
+INSERT INTO lessons (category_id, name, required_score, operation, level, type)
+VALUES
+(1, 'Tổng các phép toán 1 chữ số', 0, 'add', 1, 'arithmetic'),
+(1, 'Tổng các phép toán 2 chữ số', 0, 'add', 2, 'arithmetic'),
+(1, 'Tổng các phép toán 3 chữ số', 0, 'add', 3, 'arithmetic');
+
+-- Hiệu
+INSERT INTO lessons (category_id, name, required_score, operation, level, type)
+VALUES
+(2, 'Hiệu các phép toán 1 chữ số', 0, 'subtract', 1, 'arithmetic'),
+(2, 'Hiệu các phép toán 2 chữ số', 0, 'subtract', 2, 'arithmetic'),
+(2, 'Hiệu các phép toán 3 chữ số', 0, 'subtract', 3, 'arithmetic');
+
+-- Tích
+INSERT INTO lessons (category_id, name, required_score, operation, level, type)
+VALUES
+(3, 'Tích các phép toán 1 chữ số', 0, 'multiply', 1, 'arithmetic'),
+(3, 'Tích các phép toán 2 chữ số', 0, 'multiply', 2, 'arithmetic'),
+(3, 'Tích các phép toán 3 chữ số', 0, 'multiply', 3, 'arithmetic');
+
+-- Thương
+INSERT INTO lessons (category_id, name, required_score, operation, level, type)
+VALUES
+(4, 'Thương các phép toán 1 chữ số', 0, 'divide', 1, 'arithmetic'),
+(4, 'Thương các phép toán 2 chữ số', 0, 'divide', 2, 'arithmetic'),
+(4, 'Thương các phép toán 3 chữ số', 0, 'divide', 3, 'arithmetic');
+
+-- Hỗn hợp
+INSERT INTO lessons (category_id, name, required_score, operation, level, type)
+VALUES
+(5, 'Hỗn hợp các phép toán 1 chữ số', 0, 'mix', 1, 'arithmetic'),
+(5, 'Hỗn hợp các phép toán 2 chữ số', 0, 'mix', 2, 'arithmetic'),
+(5, 'Hỗn hợp các phép toán 3 chữ số', 0, 'mix', 3, 'arithmetic');
+
+-- Hình ảnh
+INSERT INTO lessons (category_id, name, required_score, operation, level, type)
+VALUES
+(6, 'Sắp xếp số từ 1 đến 10', 0, 'order', 1, 'visual'),
+(6, 'Đếm số con vật', 0, 'count', 1, 'visual'),
+(6, 'So sánh số lượng trái cây', 0, 'compare', 1, 'visual');
+
+
+select * from lessons
+select * from categories

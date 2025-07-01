@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Hứng Táo Toán Học</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+      user-select: none;
+    }
+    canvas {
+      background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+      display: block;
+    }
+    #gameUI {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    #question {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 42px;
+      font-weight: bold;
+      background: rgba(255,255,255,0.95);
+      color: #2c3e50;
+      padding: 15px 30px;
+      border-radius: 20px;
+      border: 3px solid #3498db;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    #score {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      background: rgba(46, 204, 113, 0.9);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 15px;
+      border: 2px solid #27ae60;
+    }
+    #message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      font-weight: bold;
+      background: rgba(231, 76, 60, 0.95);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 20px;
+      border: 3px solid #c0392b;
+      display: none;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    #instructions {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="gameUI">
+  <div id="question">5 × 7 = ?</div>
+  <div id="score">Điểm: 0</div>
+  <div id="message"></div>
+  <div id="instructions">Dùng phím ← → để di chuyển và hứng táo đúng đáp án!</div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let player = {
+  x: canvas.width / 2,
+  y: canvas.height - 100,
+  width: 80,
+  height: 60,
+  speed: 15,
+  color: '#8B4513'
+};
+
+
+let keys = {
+  left: false,
+  right: false
+};
+
+document.addEventListener('keydown', (e) => {
+  if (!gameActive) return;
+  if (e.key === 'ArrowLeft') keys.left = true;
+  if (e.key === 'ArrowRight') keys.right = true;
+});
+
+document.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft') keys.left = false;
+  if (e.key === 'ArrowRight') keys.right = false;
+});
+
+
+let apples = [];
+let currentQuestion = {};
+let score = 0;
+let gameActive = true;
+let spawnTimer = 0;
+let gameSpeed = 2;
+
+// Tạo câu hỏi toán học
+function generateQuestion() {
+  let a, b, correct;
+  let operations = ['×'];
+  let operation = operations[Math.floor(Math.random() * operations.length)];
+  
+  switch(operation) {
+    case '+':
+      a = Math.floor(Math.random() * 20) + 1;
+      b = Math.floor(Math.random() * 20) + 1;
+      correct = a + b;
+      break;
+    case '-':
+      a = Math.floor(Math.random() * 20) + 10;
+      b = Math.floor(Math.random() * 10) + 1;
+      correct = a - b;
+      break;
+    case '×':
+      a = Math.floor(Math.random() * 9) + 2;
+      b = Math.floor(Math.random() * 9) + 2;
+      correct = a * b;
+      break;
+  }
+
+  currentQuestion = {
+    a, b, operation, correct
+  };
+
+  // Đánh dấu tất cả táo cũ là sai khi có câu hỏi mới
+  apples.forEach(apple => {
+    apple.isCorrect = (apple.answer === correct);
+  });
+
+  document.getElementById('question').innerText = `${a} ${operation} ${b} = ?`;
+}
+
+// Tạo táo rơi
+function spawnApple() {
+  if (apples.length < 6) {
+    let isCorrect = Math.random() < 0.3; // 30% cơ hội táo đúng
+    let answer;
+    
+    if (isCorrect) {
+      answer = currentQuestion.correct;
+    } else {
+      // Tạo đáp án sai
+      let offset = Math.floor(Math.random() * 10) + 1;
+      if (Math.random() > 0.5) offset = -offset;
+      answer = currentQuestion.correct + offset;
+      if (answer < 0) answer = Math.abs(answer);
+    }
+
+    apples.push({
+      x: Math.random() * (canvas.width - 60) + 30,
+      y: -50,
+      width: 50,
+      height: 50,
+      speed: gameSpeed + Math.random() * 2,
+      answer: answer,
+      isCorrect: isCorrect,
+      rotation: 0
+    });
+  }
+}
+
+// Vẽ người chơi (giỏ hứng)
+function drawPlayer() {
+  ctx.fillStyle = player.color;
+  ctx.fillRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+  
+  // Vẽ tay cầm giỏ
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(player.x - 5, player.y - player.height/2 - 20, 10, 25);
+  
+  // Viền giỏ
+  ctx.strokeStyle = '#5D4037';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+}
+
+// Vẽ táo
+function drawApple(apple) {
+  ctx.save();
+  ctx.translate(apple.x, apple.y);
+  ctx.rotate(apple.rotation);
+  
+  // Vẽ táo - tất cả đều màu đỏ giống nhau
+  ctx.fillStyle = '#FF4444';
+  
+  // Thân táo
+  ctx.beginPath();
+  ctx.arc(0, 0, apple.width/2, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Cuống táo
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(-2, -apple.height/2, 4, 8);
+  
+  // Lá táo
+  ctx.fillStyle = '#228B22';
+  ctx.beginPath();
+  ctx.ellipse(5, -apple.height/2, 8, 4, Math.PI/4, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.restore();
+  
+  // Vẽ số đáp án
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 18px Arial';
+  ctx.textAlign = 'center';
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 2;
+  ctx.strokeText(apple.answer.toString(), apple.x, apple.y + 5);
+  ctx.fillText(apple.answer.toString(), apple.x, apple.y + 5);
+}
+
+// Kiểm tra va chạm
+function checkCollision(apple, player) {
+  return apple.x > player.x - player.width/2 && 
+         apple.x < player.x + player.width/2 && 
+         apple.y > player.y - player.height/2 && 
+         apple.y < player.y + player.height/2;
+}
+
+// Hiển thị thông báo
+function showMessage(text, color = '#e74c3c') {
+  const messageDiv = document.getElementById('message');
+  messageDiv.style.background = `rgba(${color === '#e74c3c' ? '231, 76, 60' : '46, 204, 113'}, 0.95)`;
+  messageDiv.style.borderColor = color === '#e74c3c' ? '#c0392b' : '#27ae60';
+  messageDiv.innerText = text;
+  messageDiv.style.display = 'block';
+  
+  setTimeout(() => {
+    messageDiv.style.display = 'none';
+  }, 2000);
+}
+
+// Cập nhật game
+function update() {
+  if (!gameActive) return;
+
+  // Xử lý di chuyển liên tục
+  if (keys.left && player.x > player.width / 2) {
+    player.x -= player.speed;
+  }
+  if (keys.right && player.x < canvas.width - player.width / 2) {
+    player.x += player.speed;
+  }
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Vẽ background effects
+  drawClouds();
+  
+  drawPlayer();
+  
+  // Sinh táo
+  spawnTimer++;
+  if (spawnTimer > 60) {
+    spawnApple();
+    spawnTimer = 0;
+  }
+  
+  // Cập nhật và vẽ táo
+  for (let i = apples.length - 1; i >= 0; i--) {
+    let apple = apples[i];
+    apple.y += apple.speed;
+    apple.rotation += 0.02;
+    
+    drawApple(apple);
+    
+    // Kiểm tra va chạm
+    if (checkCollision(apple, player)) {
+      if (apple.isCorrect) {
+        score += 10;
+        showMessage('🎉 Chính xác! +10 điểm', '#2ecc71');
+        generateQuestion();
+        gameSpeed += 0.1;
+      } else {
+        showMessage('💀 Bạn đã chọn nhầm quả thối! Game Over!');
+        gameActive = false;
+        setTimeout(() => {
+          if (confirm('Game Over! Điểm của bạn: ' + score + '. Chơi lại?')) {
+            restartGame();
+          }
+        }, 2000);
+      }
+      apples.splice(i, 1);
+    }
+    // Xóa táo ra khỏi màn hình
+    else if (apple.y > canvas.height + 50) {
+      apples.splice(i, 1);
+    }
+  }
+  
+  // Cập nhật điểm
+  document.getElementById('score').innerText = `Điểm: ${score}`;
+  
+  requestAnimationFrame(update);
+}
+
+// Vẽ mây
+function drawClouds() {
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  
+  // Mây 1
+  ctx.beginPath();
+  ctx.arc(150, 80, 30, 0, Math.PI * 2);
+  ctx.arc(180, 80, 40, 0, Math.PI * 2);
+  ctx.arc(210, 80, 30, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Mây 2
+  ctx.beginPath();
+  ctx.arc(canvas.width - 200, 120, 25, 0, Math.PI * 2);
+  ctx.arc(canvas.width - 170, 120, 35, 0, Math.PI * 2);
+  ctx.arc(canvas.width - 140, 120, 25, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Khởi động lại game
+function restartGame() {
+  score = 0;
+  gameSpeed = 2;
+  apples = [];
+  gameActive = true;
+  spawnTimer = 0;
+  player.x = canvas.width / 2;
+  generateQuestion();
+  update();
+}
+
+// Điều khiển
+document.addEventListener('keydown', (e) => {
+  if (!gameActive) return;
+  
+  switch(e.key) {
+    case 'ArrowLeft':
+      if (player.x > player.width/2) {
+        player.x -= player.speed;
+      }
+      break;
+    case 'ArrowRight':
+      if (player.x < canvas.width - player.width/2) {
+        player.x += player.speed;
+      }
+      break;
+  }
+});
+
+// Điều khiển cảm ứng cho mobile
+let touchStartX = 0;
+canvas.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+});
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  if (!gameActive) return;
+  
+  let touchX = e.touches[0].clientX;
+  let deltaX = touchX - touchStartX;
+  
+  if (Math.abs(deltaX) > 20) {
+    if (deltaX > 0 && player.x < canvas.width - player.width/2) {
+      player.x += player.speed;
+    } else if (deltaX < 0 && player.x > player.width/2) {
+      player.x -= player.speed;
+    }
+    touchStartX = touchX;
+  }
+});
+
+// Khởi tạo game
+generateQuestion();
+update();
+
+// Resize canvas khi thay đổi kích thước window
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  player.y = canvas.height - 100;
+});
+</script>
+</body>
+</html>

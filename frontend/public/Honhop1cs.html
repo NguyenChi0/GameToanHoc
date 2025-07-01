@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Game Phi Thuyền Né Hành Tinh</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+      background: #000;
+    }
+    canvas {
+      display: block;
+      background: linear-gradient(to right, #0f0f23, #1a1a3a, #2d1b69);
+    }
+    #score {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      border: 2px solid #00ffff;
+    }
+    #instructions {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 16px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      border: 2px solid #00ffff;
+    }
+    #question {
+      position: absolute;
+      top: 90px;
+      left: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #00ffff;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      border: 2px solid #00ffff;
+    }
+    #gameOver {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+      border: 3px solid #ff0040;
+      display: none;
+    }
+    #answer {
+      position: absolute;
+      top: 160px;
+      left: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #00ff00;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      border: 2px solid #00ff00;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="instructions">
+    ↑↓ Di chuyển phi thuyền<br>
+    Đâm vào hành tinh có đáp án đúng!
+  </div>
+  <div id="question">Câu hỏi sẽ hiện ở đây</div>
+  <div id="answer">Đáp án: ???</div>
+  <div id="score">Điểm: 0</div>
+  <div id="gameOver">
+    <h2>Game Over!</h2>
+    <p id="finalScore">Điểm của bạn: 0</p>
+    <p>Nhấn ENTER để chơi lại</p>
+  </div>
+  <canvas id="gameCanvas" width="900" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreDiv = document.getElementById("score");
+    const questionDiv = document.getElementById("question");
+    const answerDiv = document.getElementById("answer");
+    const gameOverDiv = document.getElementById("gameOver");
+    const finalScoreDiv = document.getElementById("finalScore");
+
+    // Game variables
+    let gameOver = false;
+    let score = 0;
+    let gameSpeed = 2;
+    let animationFrame = 0;
+    let correctAnswer = 0;
+    let currentQuestion = "";
+    let questionAnswered = false;
+    let showAnswer = false;
+    let answerTimeout = null;
+    let nextQuestionPending = false;
+
+    
+    // Spaceship object
+    let spaceship = {
+      x: 100,
+      y: canvas.height / 2,
+      width: 60,
+      height: 30,
+      vy: 0,
+      maxSpeed: 5,
+      acceleration: 0.3,
+      invulnerable: false,
+      invulnerableTime: 0
+    };
+    
+    // Arrays for game objects
+    let planets = [];
+    let stars = [];
+    let particles = [];
+    
+    // Planet spawn variables
+    let nextPlanetSpawn = 0;
+    let planetSpawnRate = 120; // frames between spawns
+    
+    // Initialize stars background
+    function initializeStars() {
+      for (let i = 0; i < 100; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2 + 0.5,
+          speed: Math.random() * 2 + 0.5,
+          brightness: Math.random() * 0.5 + 0.5
+        });
+      }
+    }
+    
+    // Create explosion particles
+    function createExplosion(x, y, color = '#ff6b6b') {
+      for (let i = 0; i < 15; i++) {
+        particles.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 10,
+          vy: (Math.random() - 0.5) * 10,
+          life: 30,
+          maxLife: 30,
+          color: color
+        });
+      }
+    }
+    
+    // Generate math question
+    function generateQuestion() {
+  const a = Math.floor(Math.random() * 9) + 1;  // 1 đến 9
+  const b = Math.floor(Math.random() * 9) + 1;
+  const operations = ["+", "-", "*"];
+  let op = operations[Math.floor(Math.random() * operations.length)];
+
+  // Nếu là phép trừ, đảm bảo không âm
+  if (op === "-" && a < b) {
+    [a, b] = [b, a];  // Hoán đổi để đảm bảo a ≥ b
+  }
+
+  let result;
+  if (op === "+") result = a + b;
+  if (op === "-") result = a - b;
+  if (op === "*") result = a * b;
+
+  correctAnswer = result;
+  currentQuestion = `${a} ${op} ${b} = ?`;
+  questionDiv.textContent = currentQuestion;
+  questionAnswered = false;
+  showAnswer = false;
+  answerDiv.style.display = 'none';
+
+  if (answerTimeout) {
+    clearTimeout(answerTimeout);
+    answerTimeout = null;
+  }
+}
+
+    
+    // Show answer temporarily
+    function showCorrectAnswer() {
+      answerDiv.textContent = `Đáp án: ${correctAnswer}`;
+      answerDiv.style.display = 'block';
+      showAnswer = true;
+      
+      // Hide answer after 2 seconds
+      answerTimeout = setTimeout(() => {
+        answerDiv.style.display = 'none';
+        showAnswer = false;
+      }, 2000);
+    }
+    
+    // Generate random planet with answer
+    function spawnPlanet() {
+      const size = Math.random() * 30 + 35;
+      const y = Math.random() * (canvas.height - size * 2) + size;
+      const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7'];
+      
+      // Generate answer (correct or wrong)
+      let answer;
+      const isCorrect = Math.random() > 0.6; // 40% chance of correct answer
+      
+      if (isCorrect) {
+        answer = correctAnswer;
+      } else {
+        // Generate wrong answer
+        const offset = Math.floor(Math.random() * 10) + 1;
+        answer = Math.random() > 0.5 ? correctAnswer + offset : Math.max(0, correctAnswer - offset);
+        if (answer === correctAnswer) answer = correctAnswer + 1; // Ensure it's different
+      }
+      
+      planets.push({
+        x: canvas.width + size,
+        y: y,
+        size: size,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotationSpeed: (Math.random() - 0.5) * 0.1,
+        rotation: 0,
+        hasRings: Math.random() > 0.7,
+        answer: answer,
+        isCorrect: isCorrect,
+        destroyed: false
+      });
+    }
+    
+    // Draw animated spaceship
+    function drawSpaceship() {
+      const engineFlame = Math.sin(animationFrame * 0.5) * 0.3 + 0.7;
+      
+      ctx.save();
+      ctx.translate(spaceship.x + spaceship.width/2, spaceship.y + spaceship.height/2);
+      
+      // Add invulnerability flashing effect
+      if (spaceship.invulnerable && Math.floor(animationFrame / 5) % 2 === 0) {
+        ctx.globalAlpha = 0.5;
+      }
+      
+      // Engine flame effect
+      ctx.fillStyle = `rgba(255, ${100 + engineFlame * 155}, 0, ${engineFlame})`;
+      ctx.beginPath();
+      ctx.ellipse(-35, 0, 15 * engineFlame, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Spaceship body (main hull)
+      ctx.fillStyle = '#c0c0c0';
+      ctx.fillRect(-30, -15, 50, 30);
+      
+      // Spaceship nose
+      ctx.fillStyle = '#e0e0e0';
+      ctx.beginPath();
+      ctx.moveTo(20, 0);
+      ctx.lineTo(30, -8);
+      ctx.lineTo(30, 8);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Wings
+      ctx.fillStyle = '#a0a0a0';
+      ctx.fillRect(-20, -20, 30, 10);
+      ctx.fillRect(-20, 10, 30, 10);
+      
+      // Cockpit
+      ctx.fillStyle = '#4a90e2';
+      ctx.beginPath();
+      ctx.ellipse(5, 0, 12, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Engine details
+      ctx.fillStyle = '#666';
+      ctx.fillRect(-30, -8, 8, 16);
+      
+      // Wing tips
+      ctx.fillStyle = '#ff0040';
+      ctx.fillRect(8, -20, 4, 10);
+      ctx.fillRect(8, 10, 4, 10);
+      
+      ctx.restore();
+    }
+    
+    // Draw animated planet (without showing answer)
+    function drawPlanet(planet) {
+      if (planet.destroyed) return;
+      
+      ctx.save();
+      ctx.translate(planet.x, planet.y);
+      ctx.rotate(planet.rotation);
+      
+      // Planet rings (if has rings)
+      if (planet.hasRings) {
+        ctx.strokeStyle = `${planet.color}80`;
+        ctx.lineWidth = 3;
+        for (let i = 1; i <= 3; i++) {
+          ctx.beginPath();
+          ctx.ellipse(0, 0, planet.size + i * 8, (planet.size + i * 8) * 0.3, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+      
+      // Planet body - same color for all planets (no hint about correct answer)
+      const gradient = ctx.createRadialGradient(-planet.size * 0.3, -planet.size * 0.3, 0, 0, 0, planet.size);
+      gradient.addColorStop(0, planet.color);
+      gradient.addColorStop(1, '#000');
+      
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(0, 0, planet.size, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Planet surface details
+      ctx.fillStyle = `${planet.color}40`;
+      ctx.beginPath();
+      ctx.arc(-planet.size * 0.3, -planet.size * 0.2, planet.size * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.arc(planet.size * 0.2, planet.size * 0.3, planet.size * 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+      
+      // Draw answer text on planet
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 18px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(planet.answer, planet.x, planet.y + 6);
+      
+      // Add text outline for better visibility
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 3;
+      ctx.strokeText(planet.answer, planet.x, planet.y + 6);
+      ctx.fillText(planet.answer, planet.x, planet.y + 6);
+      
+      planet.rotation += planet.rotationSpeed;
+    }
+    
+    // Draw background with animated stars
+    function drawBackground() {
+      // Draw moving stars
+      ctx.fillStyle = '#fff';
+      stars.forEach(star => {
+        ctx.globalAlpha = star.brightness;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      
+      // Draw particles
+      particles.forEach((particle, index) => {
+        ctx.fillStyle = particle.color;
+        ctx.globalAlpha = particle.life / particle.maxLife;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+    
+    // Update game logic
+    function update() {
+      if (gameOver) return;
+      
+      animationFrame++;
+      
+      // Update spaceship invulnerability
+      if (spaceship.invulnerable) {
+        spaceship.invulnerableTime--;
+        if (spaceship.invulnerableTime <= 0) {
+          spaceship.invulnerable = false;
+        }
+      }
+      
+      // Update spaceship movement
+      spaceship.y += spaceship.vy;
+      spaceship.vy *= 0.95; // Friction
+      
+      // Keep spaceship within bounds
+      if (spaceship.y < spaceship.height/2) {
+        spaceship.y = spaceship.height/2;
+        spaceship.vy = 0;
+      }
+      if (spaceship.y > canvas.height - spaceship.height/2) {
+        spaceship.y = canvas.height - spaceship.height/2;
+        spaceship.vy = 0;
+      }
+      
+      // Update stars
+      stars.forEach(star => {
+        star.x -= star.speed;
+        if (star.x < 0) {
+          star.x = canvas.width;
+          star.y = Math.random() * canvas.height;
+        }
+      });
+      
+      // Spawn planets
+      nextPlanetSpawn--;
+      if (nextPlanetSpawn <= 0) {
+        spawnPlanet();
+        nextPlanetSpawn = planetSpawnRate - Math.min(score * 3, 80); // Faster spawning as score increases
+      }
+      
+      // Update planets
+      planets.forEach((planet, index) => {
+        planet.x -= gameSpeed;
+        
+        // Remove planets that are off screen
+        if (planet.x + planet.size < 0) {
+          planets.splice(index, 1);
+          // Generate new question if needed
+          if (!nextQuestionPending && (planets.length === 0 || !planets.some(p => p.isCorrect && !p.destroyed))) {
+  nextQuestionPending = true;
+  setTimeout(() => {
+    generateQuestion();
+    nextQuestionPending = false;
+  }, 1000); // Hoặc giữ 2500 nếu bạn muốn
+}
+
+        }
+      });
+      
+      // Ensure there's always at least one correct answer planet
+      if (!questionAnswered && planets.length > 0 && !planets.some(p => p.isCorrect && !p.destroyed)) {
+        // Make one random planet correct
+        const availablePlanets = planets.filter(p => !p.destroyed);
+        if (availablePlanets.length > 0) {
+          const randomPlanet = availablePlanets[Math.floor(Math.random() * availablePlanets.length)];
+          randomPlanet.answer = correctAnswer;
+          randomPlanet.isCorrect = true;
+        }
+      }
+      
+      // Update particles
+      particles.forEach((particle, index) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.life--;
+        particle.vx *= 0.98;
+        particle.vy *= 0.98;
+        
+        if (particle.life <= 0) {
+          particles.splice(index, 1);
+        }
+      });
+      
+      // Check collisions (only if not invulnerable)
+      if (!spaceship.invulnerable) {
+        planets.forEach((planet, index) => {
+          if (planet.destroyed) return;
+          
+          const dx = spaceship.x + spaceship.width/2 - planet.x;
+          const dy = spaceship.y + spaceship.height/2 - planet.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < planet.size + spaceship.width/3) {
+            // Collision detected
+            if (planet.isCorrect) {
+              // Correct answer - destroy planet and score
+              createExplosion(planet.x, planet.y, '#00ff00');
+              planet.destroyed = true;
+              score++;
+              scoreDiv.textContent = `Điểm: ${score}`;
+              questionAnswered = true;
+              
+              // Show the correct answer briefly
+              showCorrectAnswer();
+              
+              // Make spaceship invulnerable for a short time
+              spaceship.invulnerable = true;
+              spaceship.invulnerableTime = 60; // 1 second at 60fps
+              
+              // Destroy all planets with the same answer to prevent hitting them again
+              planets.forEach(p => {
+                if (p.answer === correctAnswer) {
+                  p.destroyed = true;
+                }
+              });
+              
+              // Increase game speed gradually
+              if (score % 3 === 0) {
+                gameSpeed = Math.min(gameSpeed + 0.2, 6);
+              }
+              
+              // Generate new question after a delay
+              nextQuestionPending = true;
+              setTimeout(() => {
+                generateQuestion();
+                nextQuestionPending = false;
+                }, 2500);
+              
+            } else {
+              // Wrong answer - game over
+              createExplosion(spaceship.x + spaceship.width/2, spaceship.y + spaceship.height/2, '#ff0040');
+              gameOver = true;
+              gameOverDiv.style.display = 'block';
+              finalScoreDiv.textContent = `Điểm của bạn: ${score}`;
+              
+              // Show correct answer when game over
+              answerDiv.textContent = `Đáp án đúng là: ${correctAnswer}`;
+              answerDiv.style.display = 'block';
+            }
+          }
+        });
+      }
+    }
+    
+    // Main draw function
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      drawBackground();
+      drawSpaceship();
+      
+      planets.forEach(planet => {
+        drawPlanet(planet);
+      });
+    }
+    
+    // Game loop
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // Handle keyboard input
+    document.addEventListener("keydown", (e) => {
+      if (!gameOver) {
+        if (e.code === "ArrowUp" || e.code === "KeyW") {
+          spaceship.vy = Math.max(spaceship.vy - spaceship.acceleration, -spaceship.maxSpeed);
+          e.preventDefault();
+        }
+        
+        if (e.code === "ArrowDown" || e.code === "KeyS") {
+          spaceship.vy = Math.min(spaceship.vy + spaceship.acceleration, spaceship.maxSpeed);
+          e.preventDefault();
+        }
+      }
+      
+      if (gameOver && e.code === "Enter") {
+        // Reset game
+        gameOver = false;
+        score = 0;
+        gameSpeed = 2;
+        spaceship.y = canvas.height / 2;
+        spaceship.vy = 0;
+        spaceship.invulnerable = false;
+        spaceship.invulnerableTime = 0;
+        planets = [];
+        particles = [];
+        nextPlanetSpawn = 60;
+        questionAnswered = false;
+        showAnswer = false;
+        scoreDiv.textContent = `Điểm: ${score}`;
+        gameOverDiv.style.display = 'none';
+        answerDiv.style.display = 'none';
+        
+        // Clear any existing timeout
+        if (answerTimeout) {
+          clearTimeout(answerTimeout);
+          answerTimeout = null;
+        }
+        
+        generateQuestion(); // Generate first question
+        e.preventDefault();
+      }
+    });
+    
+    // Handle continuous key press
+    const keys = {};
+    document.addEventListener("keydown", (e) => {
+      keys[e.code] = true;
+    });
+    
+    document.addEventListener("keyup", (e) => {
+      keys[e.code] = false;
+    });
+    
+    // Continuous movement update
+    function handleContinuousInput() {
+      if (!gameOver) {
+        if (keys["ArrowUp"] || keys["KeyW"]) {
+          spaceship.vy = Math.max(spaceship.vy - spaceship.acceleration, -spaceship.maxSpeed);
+        }
+        
+        if (keys["ArrowDown"] || keys["KeyS"]) {
+          spaceship.vy = Math.min(spaceship.vy + spaceship.acceleration, spaceship.maxSpeed);
+        }
+      }
+      
+      requestAnimationFrame(handleContinuousInput);
+    }
+    
+    // Initialize and start game
+    initializeStars();
+    generateQuestion(); // Generate first question
+    gameLoop();
+    handleContinuousInput();
+  </script>
+</body>
+</html>

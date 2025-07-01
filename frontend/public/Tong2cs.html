@@ -54,52 +54,50 @@
         }
 
         .answer-button {
-    position: relative;
-    background: #ff4444; /* Giữ nguyên nền */
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-    width: 60px;
-    height: 60px;
-    padding-top: 15px;
-    border: 3px solid transparent;
-    border-radius: 10px;
-    cursor: pointer;
-    z-index: 1;
-    transition: all 0.3s ease;
-}
+            position: relative;
+            background: #ff4444;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            width: 80px;
+            height: 60px;
+            padding-top: 15px;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
 
-.answer-button::before {
-    content: "";
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    border-radius: 12px;
-    background: linear-gradient(270deg, #ff6b6b, #ffd700, #32cd32, #00bfff, #ff6b6b);
-    background-size: 800% 800%;
-    animation: borderAnimation 5s linear infinite;
-    z-index: -1;
-    pointer-events: none;
-    mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    -webkit-mask-composite: destination-out;
-    padding: 3px; /* tạo viền */
-}
+        .answer-button::before {
+            content: "";
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 12px;
+            background: linear-gradient(270deg, #ff6b6b, #ffd700, #32cd32, #00bfff, #ff6b6b);
+            background-size: 800% 800%;
+            animation: borderAnimation 5s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+            mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: destination-out;
+            padding: 3px;
+        }
 
-@keyframes borderAnimation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-
+        @keyframes borderAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
         .answer-button:hover {
             background: #e63939;
@@ -132,7 +130,7 @@
         }
 
         .reel {
-            width: 80px;
+            width: 100px;
             height: 100px;
             background: #fff;
             border-radius: 5px;
@@ -172,28 +170,27 @@
         }
 
         .lever {
-    position: absolute;
-    right: -60px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 50px;
-    height: 100px;
-    background: #c0c0c0;
-    border: 3px solid #888;
-    border-radius: 10px 10px 0 0;
-    cursor: grab;
-    transition: background 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    overflow: hidden;
-}
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 100px;
+            background: #c0c0c0;
+            border: 3px solid #888;
+            border-radius: 10px 10px 0 0;
+            cursor: grab;
+            transition: background 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: hidden;
+        }
 
-.lever:active {
-    cursor: grabbing;
-    background: #a9a9a9;
-}
-
+        .lever:active {
+            cursor: grabbing;
+            background: #a9a9a9;
+        }
 
         .score-display {
             position: absolute;
@@ -299,7 +296,8 @@
             position: fixed;
             width: 4px;
             height: 4px;
-            background: radial-gradient(circle, #fff 0%, transparent 70%);
+            background: radi
+al-gradient(circle, #fff 0%, transparent 70%);
             border-radius: 50%;
             z-index: 99;
             pointer-events: none;
@@ -315,7 +313,7 @@
                 opacity: 1;
             }
             100% {
-                transform: scale(2);
+                transform: scale(20);
                 opacity: 0;
             }
         }
@@ -349,17 +347,17 @@
         <div class="display-panel">
             <div class="question">TỔNG CỦA NÓ LÀ GÌ? 🤔</div>
             <div class="answer-options">
-                <div class="answer-button" onclick="selectAnswer(this, 3)">3</div>
-                <div class="answer-button" onclick="selectAnswer(this, 6)">6</div>
-                <div class="answer-button" onclick="selectAnswer(this, 4)">4</div>
+                <div class="answer-button" onclick="selectAnswer(this, 30)">30</div>
+                <div class="answer-button" onclick="selectAnswer(this, 60)">60</div>
+                <div class="answer-button" onclick="selectAnswer(this, 40)">40</div>
             </div>
         </div>
 
         <div class="slot-machine" id="slotMachine">
             <div class="score-display" id="scoreDisplay">Điểm của bạn: <span id="score">0</span></div>
             <div class="reels">
-                <div class="reel" id="reel1"><span class="number">1</span></div>
-                <div class="reel" id="reel2"><span class="number">2</span></div>
+                <div class="reel" id="reel1"><span class="number">11</span></div>
+                <div class="reel" id="reel2"><span class="number">22</span></div>
             </div>
             <div class="lever" onclick="spinReels()"></div>
         </div>
@@ -369,7 +367,7 @@
 
     <script>
         let score = 0;
-        let currentSum = 3;
+        let currentSum = 33;
         let selectedAnswer = null;
         let isSpinning = false;
 
@@ -447,82 +445,62 @@
             const gameContainer = document.getElementById('gameContainer');
             const scoreDisplay = document.getElementById('scoreDisplay');
             
-            // Show celebration message
             celebrationMessage.style.display = 'block';
-            
-            // Add celebrating class to game container
             gameContainer.classList.add('celebrating');
-            
-            // Add score increase animation
             scoreDisplay.classList.add('score-increase');
-            
-            // Play success sound
             playSuccessSound();
-            
-            // Create visual effects
             createConfetti();
             createFireworks();
             
-            // Hide celebration message after 2 seconds
             setTimeout(() => {
                 celebrationMessage.style.display = 'none';
                 gameContainer.classList.remove('celebrating');
                 scoreDisplay.classList.remove('score-increase');
             }, 2000);
         }
+
         function showWrongMessage() {
-    const wrongMessage = document.getElementById('wrongMessage');
-    const gameContainer = document.getElementById('gameContainer');
-
-    // Hiển thị thông báo sai
-    wrongMessage.style.display = 'block';
-
-    // Làm khung game lắc nhẹ
-    gameContainer.classList.add('celebrating');
-
-    // Sau 2 giây thì ẩn đi
-    setTimeout(() => {
-        wrongMessage.style.display = 'none';
-        gameContainer.classList.remove('celebrating');
-    }, 2000);
-}
-
+            const wrongMessage = document.getElementById('wrongMessage');
+            const gameContainer = document.getElementById('gameContainer');
+            wrongMessage.style.display = 'block';
+            gameContainer.classList.add('celebrating');
+            setTimeout(() => {
+                wrongMessage.style.display = 'none';
+                gameContainer.classList.remove('celebrating');
+            }, 2000);
+        }
 
         const lever = document.querySelector('.lever');
-let isDragging = false;
-let startY = 0;
-let currentY = 0;
-let maxDrag = 80; // Giới hạn kéo xuống tối đa (px)
-let minOffset = 0;
+        let isDragging = false;
+        let startY = 0;
+        let currentY = 0;
+        let maxDrag = 80;
+        let minOffset = 0;
 
-lever.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startY = e.clientY;
-    lever.style.transition = 'none';
-});
+        lever.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startY = e.clientY;
+            lever.style.transition = 'none';
+        });
 
-document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    currentY = e.clientY;
-    let offset = Math.min(maxDrag, Math.max(minOffset, currentY - startY));
-    lever.style.transform = `translateY(${offset}px)`;
-});
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentY = e.clientY;
+            let offset = Math.min(maxDrag, Math.max(minOffset, currentY - startY));
+            lever.style.transform = `translateY(${offset}px)`;
+        });
 
-document.addEventListener('mouseup', () => {
-    if (!isDragging) return;
-    isDragging = false;
-    lever.style.transition = 'transform 0.3s ease';
-
-    // Nếu kéo đủ xa, thì quay
-    if (currentY - startY > 50) {
-        lever.style.transform = 'translateY(0)';
-        spinReels();
-    } else {
-        // Quay lại vị trí cũ nếu không kéo đủ
-        lever.style.transform = 'translateY(0)';
-    }
-});
-
+        document.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            lever.style.transition = 'transform 0.3s ease';
+            if (currentY - startY > 50) {
+                lever.style.transform = 'translateY(0)';
+                spinReels();
+            } else {
+                lever.style.transform = 'translateY(0)';
+            }
+        });
 
         function spinReels() {
             if (isSpinning) return;
@@ -533,15 +511,13 @@ document.addEventListener('mouseup', () => {
             const number1 = reel1.querySelector('.number');
             const number2 = reel2.querySelector('.number');
 
-            // Start spinning animation for numbers only
             reel1.classList.add('spinning');
             reel2.classList.add('spinning');
 
-            // Simulate spinning with random numbers
             let spinCount = 0;
             const spinInterval = setInterval(() => {
-                number1.textContent = Math.floor(Math.random() * 6) + 1;
-                number2.textContent = Math.floor(Math.random() * 6) + 1;
+                number1.textContent = Math.floor(Math.random() * 90) + 10;
+                number2.textContent = Math.floor(Math.random() * 90) + 10;
                 spinCount++;
                 if (spinCount > 20) {
                     clearInterval(spinInterval);
@@ -556,27 +532,22 @@ document.addEventListener('mouseup', () => {
             const number1 = reel1.querySelector('.number');
             const number2 = reel2.querySelector('.number');
 
-            // Set final numbers
-            const num1 = Math.floor(Math.random() * 6) + 1;
-            const num2 = Math.floor(Math.random() * 6) + 1;
+            const num1 = Math.floor(Math.random() * 90) + 10;
+            const num2 = Math.floor(Math.random() * 90) + 10;
             currentSum = num1 + num2;
 
             number1.textContent = num1;
             number2.textContent = num2;
 
-            // Stop spinning animation
             reel1.classList.remove('spinning');
             reel2.classList.remove('spinning');
 
-            // Reset answer selection
             document.querySelectorAll('.answer-button').forEach(btn => {
                 btn.classList.remove('selected');
             });
             selectedAnswer = null;
 
-            // Generate new answer options
             updateAnswerOptions();
-
             isSpinning = false;
         }
 
@@ -585,15 +556,13 @@ document.addEventListener('mouseup', () => {
             const correctAnswer = currentSum;
             const options = [correctAnswer];
 
-            // Generate 2 wrong answers
             while (options.length < 3) {
-                const wrongAnswer = Math.floor(Math.random() * 10) + 2;
-                if (!options.includes(wrongAnswer)) {
+                const wrongAnswer = correctAnswer + Math.floor(Math.random() * 20 - 10);
+                if (!options.includes(wrongAnswer) && wrongAnswer >= 20 && wrongAnswer <= 198) {
                     options.push(wrongAnswer);
                 }
             }
 
-            // Shuffle options
             for (let i = options.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [options[i], options[j]] = [options[j], options[i]];
@@ -608,32 +577,28 @@ document.addEventListener('mouseup', () => {
         function selectAnswer(element, answer) {
             if (isSpinning) return;
 
-            // Remove previous selection
             document.querySelectorAll('.answer-button').forEach(btn => {
                 btn.classList.remove('selected');
             });
 
-            // Add selection
             element.classList.add('selected');
             selectedAnswer = answer;
 
-            // Check answer
             setTimeout(() => {
                 if (answer === currentSum) {
                     score += 10;
                     element.style.background = '#32cd32';
-                    showCelebration(); // Show celebration effects
+                    showCelebration();
                 } else {
                     element.style.background = '#b22222';
                     showWrongMessage();
                 }
                 updateScoreDisplay();
 
-                // Auto spin after result
                 setTimeout(() => {
                     element.style.background = '#ff4444';
                     spinReels();
-                }, 2500); // Increased delay to allow celebration to finish
+                }, 2500);
             }, 500);
         }
 
@@ -646,7 +611,6 @@ document.addEventListener('mouseup', () => {
             updateScoreDisplay();
             spinReels();
 
-            // Visual feedback
             const slotMachine = document.querySelector('.slot-machine');
             slotMachine.style.transform = 'scale(1.05)';
             setTimeout(() => {
@@ -654,10 +618,7 @@ document.addEventListener('mouseup', () => {
             }, 200);
         }
 
-        // Initialize audio on first user interaction
         document.addEventListener('click', initAudio, { once: true });
-        
-        // Initialize game
         updateAnswerOptions();
     </script>
 </body>

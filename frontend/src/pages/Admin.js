@@ -16,6 +16,16 @@ export default function Admin() {
   });
   const [lessons, setLessons] = useState([]);
 
+  const [newQ, setNewQ] = useState({
+    lesson_id: "",
+    content: "",
+    correct_answer: "",
+    options: "",
+    image_url: "",
+    question_type: "text",
+    answer_type: "text",
+  });
+
   useEffect(() => {
     fetchCategories();
     fetchLessons();
@@ -109,6 +119,32 @@ export default function Admin() {
     alert("✅ Cập nhật thành công!");
   };
 
+  const handleAddQuestion = async () => {
+    try {
+      if (
+        !newQ.lesson_id ||
+        !newQ.content ||
+        !newQ.correct_answer ||
+        !newQ.options
+      )
+        return alert("Vui lòng điền đầy đủ thông tin câu hỏi");
+      JSON.parse(newQ.options);
+      await axios.post("http://localhost:5000/api/questions", newQ);
+      alert("✅ Thêm câu hỏi thành công!");
+      setNewQ({
+        lesson_id: "",
+        content: "",
+        correct_answer: "",
+        options: "",
+        image_url: "",
+        question_type: "text",
+        answer_type: "text",
+      });
+    } catch (err) {
+      alert("❌ Lỗi khi thêm câu hỏi: " + err.message);
+    }
+  };
+
   return (
     <div
       style={{
@@ -120,37 +156,28 @@ export default function Admin() {
     >
       <h1 style={{ textAlign: "center" }}>🛠️ Trang Quản Trị</h1>
 
+      {/* CATEGORY */}
       <div style={{ marginBottom: 40 }}>
         <h2>📁 Quản lý Category</h2>
-        <div style={{ marginBottom: 10 }}>
-          <label>Tên danh mục:</label>
-          <br />
-          <input
-            type="text"
-            value={category.name}
-            onChange={(e) => setCategory({ ...category, name: e.target.value })}
-            style={{ padding: 8, width: "100%" }}
-          />
-        </div>
+        <input
+          type="text"
+          value={category.name}
+          onChange={(e) => setCategory({ ...category, name: e.target.value })}
+          style={{ padding: 8, width: "100%" }}
+        />
         {category.id ? (
           <button onClick={handleUpdateCategory}>Cập nhật Category</button>
         ) : (
           <button onClick={handleAddCategory}>Thêm Category</button>
         )}
-
         <ul style={{ marginTop: 20 }}>
           {categories.map((cat) => (
-            <li key={cat.id} style={{ marginTop: 8 }}>
+            <li key={cat.id}>
               📁 {cat.name}
-              <button
-                onClick={() => handleEditCategory(cat)}
-                style={{ marginLeft: 10 }}
-              >
-                Sửa
-              </button>
+              <button onClick={() => handleEditCategory(cat)}>Sửa</button>
               <button
                 onClick={() => handleDeleteCategory(cat.id)}
-                style={{ marginLeft: 10, color: "red" }}
+                style={{ color: "red" }}
               >
                 Xoá
               </button>
@@ -159,129 +186,149 @@ export default function Admin() {
         </ul>
       </div>
 
+      {/* LESSON */}
       <div style={{ marginBottom: 40 }}>
         <h2>📘 Quản lý Bài Học</h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
-          <div style={{ flex: "1 1 30%" }}>
-            <label>Chọn danh mục:</label>
-            <br />
-            <select
-              value={lesson.category_id}
-              onChange={(e) =>
-                setLesson({ ...lesson, category_id: e.target.value })
-              }
-              style={{ padding: 8, width: "100%" }}
-            >
-              <option value="">-- Chọn Category --</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div style={{ flex: "1 1 30%" }}>
-            <label>Tên bài học:</label>
-            <br />
-            <input
-              type="text"
-              value={lesson.name}
-              onChange={(e) => setLesson({ ...lesson, name: e.target.value })}
-              style={{ padding: 8, width: "100%" }}
-            />
-          </div>
-          <div style={{ flex: "1 1 30%" }}>
-            <label>Điểm yêu cầu:</label>
-            <br />
-            <input
-              type="number"
-              value={lesson.required_score}
-              onChange={(e) =>
-                setLesson({ ...lesson, required_score: Number(e.target.value) })
-              }
-              style={{ padding: 8, width: "100%" }}
-            />
-          </div>
-          <div style={{ flex: "1 1 30%" }}>
-            <label>Phép toán (operation):</label>
-            <br />
-            <input
-              type="text"
-              value={lesson.operation}
-              onChange={(e) =>
-                setLesson({ ...lesson, operation: e.target.value })
-              }
-              style={{ padding: 8, width: "100%" }}
-              placeholder="VD: add, subtract, compare"
-            />
-          </div>
-          <div style={{ flex: "1 1 30%" }}>
-            <label>Cấp độ (level):</label>
-            <br />
-            <input
-              type="number"
-              value={lesson.level}
-              onChange={(e) =>
-                setLesson({ ...lesson, level: Number(e.target.value) })
-              }
-              style={{ padding: 8, width: "100%" }}
-              min="1"
-            />
-          </div>
-          <div style={{ flex: "1 1 30%" }}>
-            <label>Loại (type):</label>
-            <br />
-            <select
-              value={lesson.type}
-              onChange={(e) => setLesson({ ...lesson, type: e.target.value })}
-              style={{ padding: 8, width: "100%" }}
-            >
-              <option value="arithmetic">Số học</option>
-              <option value="visual">Hình ảnh</option>
-            </select>
-          </div>
+          <select
+            value={lesson.category_id}
+            onChange={(e) =>
+              setLesson({ ...lesson, category_id: e.target.value })
+            }
+          >
+            <option value="">-- Chọn Category --</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="Tên bài học"
+            value={lesson.name}
+            onChange={(e) => setLesson({ ...lesson, name: e.target.value })}
+          />
+          <input
+            type="number"
+            placeholder="Điểm yêu cầu"
+            value={lesson.required_score}
+            onChange={(e) =>
+              setLesson({ ...lesson, required_score: Number(e.target.value) })
+            }
+          />
+          <input
+            type="text"
+            placeholder="Phép toán (add, subtract...)"
+            value={lesson.operation}
+            onChange={(e) =>
+              setLesson({ ...lesson, operation: e.target.value })
+            }
+          />
+          <input
+            type="number"
+            placeholder="Cấp độ"
+            value={lesson.level}
+            onChange={(e) =>
+              setLesson({ ...lesson, level: Number(e.target.value) })
+            }
+          />
+          <select
+            value={lesson.type}
+            onChange={(e) => setLesson({ ...lesson, type: e.target.value })}
+          >
+            <option value="arithmetic">Số học</option>
+            <option value="visual">Hình ảnh</option>
+          </select>
         </div>
-        <div style={{ marginTop: 20 }}>
+        <div style={{ marginTop: 10 }}>
           {lesson.id ? (
             <button onClick={handleUpdateLesson}>Cập nhật Bài học</button>
           ) : (
             <button onClick={handleAddLesson}>Thêm Bài học</button>
           )}
         </div>
-      </div>
 
-      <div>
-        <h3>📋 Danh sách bài học theo danh mục</h3>
+        <h3 style={{ marginTop: 30 }}>📋 Danh sách bài học</h3>
         {categories.map((cat) => (
-          <div key={cat.id} style={{ marginBottom: 30 }}>
+          <div key={cat.id}>
             <h4>📁 {cat.name}</h4>
             <ul>
               {lessons
                 .filter((l) => l.category_id === cat.id)
                 .map((item) => (
-                  <li key={item.id} style={{ marginBottom: 10 }}>
-                    <strong>📘 {item.name}</strong> - Phép toán:{" "}
-                    {item.operation} - Level: {item.level} - Type: {item.type} -
-                    Điểm yêu cầu: {item.required_score}
-                    <div>
-                      <button
-                        onClick={() => handleEditLesson(item)}
-                        style={{ marginTop: 5, marginRight: 10 }}
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDeleteLesson(item.id)}
-                        style={{ color: "red" }}
-                      >
-                        Xoá
-                      </button>
-                    </div>
+                  <li key={item.id}>
+                    📘 {item.name} - Phép toán: {item.operation} - Level:{" "}
+                    {item.level} - Type: {item.type}
+                    <button onClick={() => handleEditLesson(item)}>Sửa</button>
+                    <button
+                      onClick={() => handleDeleteLesson(item.id)}
+                      style={{ color: "red" }}
+                    >
+                      Xoá
+                    </button>
                   </li>
                 ))}
             </ul>
           </div>
         ))}
+      </div>
+
+      {/* QUESTIONS */}
+      <div style={{ marginTop: 40 }}>
+        <h2>📝 Thêm câu hỏi mới</h2>
+        <select
+          value={newQ.lesson_id}
+          onChange={(e) => setNewQ({ ...newQ, lesson_id: e.target.value })}
+        >
+          <option value="">-- Chọn bài học --</option>
+          {lessons.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder="Nội dung câu hỏi"
+          value={newQ.content}
+          onChange={(e) => setNewQ({ ...newQ, content: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Đáp án đúng"
+          value={newQ.correct_answer}
+          onChange={(e) => setNewQ({ ...newQ, correct_answer: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder='Đáp án (dạng JSON: ["2","3","5"])'
+          value={newQ.options}
+          onChange={(e) => setNewQ({ ...newQ, options: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Link ảnh minh họa (nếu có)"
+          value={newQ.image_url}
+          onChange={(e) => setNewQ({ ...newQ, image_url: e.target.value })}
+        />
+        <select
+          value={newQ.question_type}
+          onChange={(e) => setNewQ({ ...newQ, question_type: e.target.value })}
+        >
+          <option value="text">Text</option>
+          <option value="image">Image</option>
+        </select>
+        <select
+          value={newQ.answer_type}
+          onChange={(e) => setNewQ({ ...newQ, answer_type: e.target.value })}
+        >
+          <option value="text">Text</option>
+          <option value="image">Image</option>
+        </select>
+        <button onClick={handleAddQuestion} style={{ marginTop: 10 }}>
+          ➕ Thêm câu hỏi
+        </button>
       </div>
     </div>
   );

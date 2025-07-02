@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Game Toán Học - Game 1</title>
+    <style>
+      body {
+        font-family: Arial;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .question {
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+      .options button {
+        margin: 8px;
+        padding: 12px 20px;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      #result {
+        font-weight: bold;
+        margin-top: 10px;
+      }
+      .controls button {
+        margin-top: 20px;
+        padding: 10px 16px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎮 Game Toán Học</h1>
+    <p><strong>Thời gian:</strong> <span id="time">60</span> giây</p>
+    <p><strong>Điểm:</strong> <span id="score">0</span></p>
+    <div class="question" id="question">Câu hỏi...</div>
+    <div class="options" id="options"></div>
+    <div id="result"></div>
+    <div class="controls">
+      <button onclick="restartGame()">🔁 Chơi lại</button>
+      <button onclick="endGame()">🏁 Kết thúc</button>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const op = urlParams.get("op") || "add";
+      const level = parseInt(urlParams.get("level")) || 1;
+      const username = localStorage.getItem("username");
+
+      let time = 60,
+        score = 0,
+        timer;
+
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function generateQuestion() {
+        const max = level === 1 ? 9 : level === 2 ? 99 : 999;
+        const a = getRandomInt(1, max);
+        const b = getRandomInt(1, max);
+        let question = "",
+          answer = 0;
+
+        switch (op) {
+          case "add":
+            question = `${a} + ${b}`;
+            answer = a + b;
+            break;
+          case "subtract":
+            question = `${a} - ${b}`;
+            answer = a - b;
+            break;
+          case "multiply":
+            question = `${a} × ${b}`;
+            answer = a * b;
+            break;
+          case "divide":
+            answer = a;
+            question = `${a * b} ÷ ${b}`;
+            break;
+          default:
+            question = `${a} + ${b}`;
+            answer = a + b;
+        }
+
+        document.getElementById("question").innerText = question;
+        renderOptions(answer);
+      }
+
+      function renderOptions(correct) {
+        const container = document.getElementById("options");
+        container.innerHTML = "";
+        const correctIndex = getRandomInt(0, 3);
+
+        for (let i = 0; i < 4; i++) {
+          const btn = document.createElement("button");
+          const option =
+            i === correctIndex ? correct : correct + getRandomInt(-10, 10);
+          btn.innerText = option;
+          btn.onclick = () => handleAnswer(option, correct);
+          container.appendChild(btn);
+        }
+      }
+
+      function handleAnswer(choice, correct) {
+        const result = document.getElementById("result");
+        if (choice === correct) {
+          score += 10;
+          document.getElementById("score").innerText = score;
+          result.innerText = "✅ Chính xác!";
+        } else {
+          result.innerText = `❌ Sai! Đáp án là ${correct}`;
+        }
+        setTimeout(() => {
+          result.innerText = "";
+          generateQuestion();
+        }, 1000);
+      }
+
+      function updateTime() {
+        time--;
+        document.getElementById("time").innerText = time;
+        if (time === 0) {
+          clearInterval(timer);
+          endGame();
+        }
+      }
+
+      function startGame() {
+        time = 60;
+        score = 0;
+        document.getElementById("score").innerText = score;
+        document.getElementById("time").innerText = time;
+        generateQuestion();
+        timer = setInterval(updateTime, 1000);
+      }
+
+      function restartGame() {
+        clearInterval(timer);
+        startGame();
+      }
+
+      async function endGame() {
+        clearInterval(timer);
+        if (!username) {
+          alert("Bạn chưa đăng nhập!");
+          window.top.location.href = "/";
+          return;
+        }
+
+        try {
+          const res = await fetch(
+            `http://localhost:5000/api/score/${username}`
+          );
+          const data = await res.json();
+          const currentScore = data.score || 0;
+
+          if (score > currentScore) {
+            await fetch("http://localhost:5000/api/score/save", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, score }),
+            });
+          }
+
+          alert("🎉 Trò chơi kết thúc! Điểm của bạn: " + score);
+          window.top.location.href = "http://localhost:3000";
+        } catch (err) {
+          alert("❌ Gặp lỗi khi lưu điểm: " + err.message);
+          window.location.replace("/");
+        }
+      }
+
+      startGame();
+    </script>
+  </body>
+</html>

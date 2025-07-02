@@ -11,13 +11,13 @@ export default function Home({ username }) {
 
   // Ánh xạ operation → các game phù hợp
   const operationToGames = {
-    add: ["game1.html", "game2.html"],
-    subtract: ["game1.html", "game3.html"],
-    multiply: ["game2.html", "game3.html"],
-    divide: ["game1.html"],
-    count: ["game2.html"],
-    compare: ["game3.html"],
-    order: ["game1.html", "game2.html"],
+    add: ["game4.html"],
+    subtract: ["game1.html", "game2.html", "game3.html"],
+    multiply: ["game1.html", "game2.html", "game3.html"],
+    divide: ["game1.html", "game2.html", "game3.html"],
+    count: ["game4.html"],
+    compare: ["game4.html"],
+    order: ["game4.html"],
     // Mặc định nếu không có operation
     default: ["game1.html", "game2.html", "game3.html"],
   };

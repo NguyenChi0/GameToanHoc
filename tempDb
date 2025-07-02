@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS gametoanhoc;
 CREATE DATABASE gametoanhoc;
 USE gametoanhoc;
 
@@ -22,7 +23,6 @@ CREATE TABLE lessons (
     category_id INT,
     name VARCHAR(100) NOT NULL,      -- VD: "Tổng trong phạm vi 10"
     required_score INT DEFAULT 0,    -- Điểm cần để mở bài này
-	file VARCHAR(255),
     operation VARCHAR(50),     -- VD: 'add', 'subtract', 'count', 'compare', 'order'
     level INT DEFAULT 1,       -- Mức độ bài học (1 chữ số, 2 chữ số,...)
     type VARCHAR(20) DEFAULT 'arithmetic', -- 'arithmetic' hoặc 'visual'

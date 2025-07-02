@@ -9,20 +9,7 @@ export default function Home({ username }) {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Ánh xạ operation → các game phù hợp
-  const operationToGames = {
-    add: ["game4.html"],
-    subtract: ["game1.html", "game2.html", "game3.html"],
-    multiply: ["game1.html", "game2.html", "game3.html"],
-    divide: ["game1.html", "game2.html", "game3.html"],
-    count: ["game4.html"],
-    compare: ["game4.html"],
-    order: ["game4.html"],
-    // Mặc định nếu không có operation
-    default: ["game1.html", "game2.html", "game3.html"],
-  };
-
-  // Lấy danh sách category
+  // Lấy danh mục phép toán
   useEffect(() => {
     fetch("http://localhost:5000/api/categories")
       .then((res) => res.json())
@@ -30,7 +17,7 @@ export default function Home({ username }) {
       .catch((err) => console.error("Lỗi lấy categories:", err));
   }, []);
 
-  // Lấy tất cả lessons
+  // Lấy bài học
   useEffect(() => {
     fetch("http://localhost:5000/api/lessons")
       .then((res) => res.json())
@@ -38,8 +25,8 @@ export default function Home({ username }) {
       .catch((err) => console.error("Lỗi lấy lessons:", err));
   }, []);
 
-  // Lấy điểm người dùng
-  const fetchScore = () => {
+  // Lấy điểm
+  useEffect(() => {
     if (username) {
       fetch(`http://localhost:5000/api/score/${username}`)
         .then((res) => res.json())
@@ -52,10 +39,6 @@ export default function Home({ username }) {
     } else {
       setLoadingScore(false);
     }
-  };
-
-  useEffect(() => {
-    fetchScore();
   }, [username]);
 
   return (
@@ -89,7 +72,7 @@ export default function Home({ username }) {
         <p style={{ color: "red" }}>Vui lòng đăng nhập để lưu điểm.</p>
       )}
 
-      {/* Hiển thị danh sách Category và bài học */}
+      {/* Hiển thị danh mục và bài học */}
       <div>
         {categories.map((cat) => (
           <div key={cat.id} style={{ marginBottom: "30px" }}>
@@ -110,29 +93,15 @@ export default function Home({ username }) {
                   <div
                     key={lesson.id}
                     onClick={() => {
-                      if (lesson.type === "visual") {
-                        // Xử lý game dạng hình ảnh nếu có
-                        navigate(`/visual/${lesson.id}`, {
-                          state: {
-                            lessonName: lesson.name,
-                          },
-                        });
-                      } else {
-                        // Chọn random 1 game phù hợp
-                        const list =
-                          operationToGames[lesson.operation] ||
-                          operationToGames.default;
-                        const randomGame =
-                          list[Math.floor(Math.random() * list.length)];
-                        navigate(`/game/${lesson.id}`, {
-                          state: {
-                            game: randomGame,
-                            operation: lesson.operation,
-                            level: lesson.level,
-                            lessonName: lesson.name,
-                          },
-                        });
-                      }
+                      // Chuyển sang GamePage để hiển thị game phù hợp
+                      navigate(`/game/${lesson.id}`, {
+                        state: {
+                          lessonId: lesson.id,
+                          lessonName: lesson.name,
+                          operation: lesson.operation,
+                          level: lesson.level,
+                        },
+                      });
                     }}
                     style={{
                       padding: "12px",

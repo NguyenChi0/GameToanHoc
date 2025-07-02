@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Game Toán Học - Game 1</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .question {
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+      .options button {
+        margin: 8px;
+        padding: 12px 20px;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      #result {
+        font-weight: bold;
+        margin-top: 10px;
+      }
+      .controls button {
+        margin-top: 20px;
+        padding: 10px 16px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎮 Game Toán Học</h1>
+    <p><strong>Thời gian:</strong> <span id="time">60</span> giây</p>
+    <p><strong>Điểm:</strong> <span id="score">0</span></p>
+    <div class="question" id="question">Câu hỏi...</div>
+    <div class="options" id="options"></div>
+    <div id="result"></div>
+    <div class="controls">
+      <button onclick="restartGame()">🔁 Chơi lại</button>
+      <button onclick="endGame()">🏁 Kết thúc</button>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const lessonId = urlParams.get("lessonId") || 1;
+      const username = localStorage.getItem("username");
+
+      let questionsFromDB = [];
+      let currentIndex = 0;
+      let time = 60;
+      let score = 0;
+      let timer;
+
+      async function fetchQuestions() {
+        try {
+          const res = await fetch(
+            `http://localhost:5000/api/questions?lesson_id=${lessonId}`
+          );
+          const data = await res.json();
+          if (data.length > 0) {
+            questionsFromDB = data;
+          }
+        } catch (err) {
+          console.error("Lỗi khi lấy câu hỏi từ server", err);
+        }
+      }
+
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function generateRandomQuestion() {
+        const a = getRandomInt(1, 20);
+        const b = getRandomInt(1, 20);
+        const op = ["+", "-", "×", "÷"][getRandomInt(0, 3)];
+        let question = `${a} ${op} ${b}`;
+        let correct = 0;
+
+        switch (op) {
+          case "+":
+            correct = a + b;
+            break;
+          case "-":
+            correct = a - b;
+            break;
+          case "×":
+            correct = a * b;
+            break;
+          case "÷":
+            correct = Math.floor(a / b);
+            question = `${a * b} ÷ ${b}`;
+            break;
+        }
+
+        const options = new Set([correct]);
+        while (options.size < 4) {
+          options.add(correct + getRandomInt(-10, 10));
+        }
+        return {
+          content: question,
+          correct_answer: correct.toString(),
+          options: Array.from(options),
+        };
+      }
+
+      function showQuestion() {
+        let q;
+        if (currentIndex < questionsFromDB.length) {
+          q = questionsFromDB[currentIndex];
+          currentIndex++;
+        } else {
+          q = generateRandomQuestion();
+        }
+
+        document.getElementById("question").innerText = q.content;
+        renderOptions(q);
+      }
+
+      function renderOptions(question) {
+        const container = document.getElementById("options");
+        container.innerHTML = "";
+
+        const shuffled = [...question.options].sort(() => Math.random() - 0.5);
+
+        shuffled.forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.innerText = opt;
+          btn.onclick = () => handleAnswer(opt, question.correct_answer);
+          container.appendChild(btn);
+        });
+      }
+
+      function handleAnswer(choice, correct) {
+        const result = document.getElementById("result");
+        if (choice == correct) {
+          score += 10;
+          document.getElementById("score").innerText = score;
+          result.innerText = "✅ Chính xác!";
+        } else {
+          result.innerText = `❌ Sai! Đáp án là ${correct}`;
+        }
+        setTimeout(() => {
+          result.innerText = "";
+          showQuestion();
+        }, 1000);
+      }
+
+      function updateTime() {
+        time--;
+        document.getElementById("time").innerText = time;
+        if (time === 0) {
+          clearInterval(timer);
+          endGame();
+        }
+      }
+
+      function startGame() {
+        time = 60;
+        score = 0;
+        currentIndex = 0;
+        document.getElementById("score").innerText = score;
+        document.getElementById("time").innerText = time;
+        showQuestion();
+        timer = setInterval(updateTime, 1000);
+      }
+
+      function restartGame() {
+        clearInterval(timer);
+        startGame();
+      }
+
+      function endGame() {
+        clearInterval(timer);
+        if (!username) {
+          alert("Bạn chưa đăng nhập!");
+          window.location.href = "/";
+          return;
+        }
+
+        fetch("http://localhost:5000/api/score/save", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, score }),
+        })
+          .then((res) => res.json())
+          .then(() => {
+            alert("🎉 Trò chơi kết thúc! Điểm của bạn: " + score);
+            window.top.location.href = "http://localhost:3000";
+          })
+          .catch((err) => {
+            alert("❌ Gặp lỗi khi lưu điểm: " + err.message);
+            window.location.href = "/";
+          });
+      }
+
+      (async () => {
+        await fetchQuestions();
+        startGame();
+      })();
+    </script>
+  </body>
+</html>

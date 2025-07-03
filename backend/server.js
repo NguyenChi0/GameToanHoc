@@ -13,12 +13,14 @@ const scoreRoutes = require("./routes/score");
 const categoryRoutes = require("./routes/categories");
 const lessonRoutes = require("./routes/lessons");
 const resultRoutes = require("./routes/results");
+const questionsRouter = require("./routes/questions");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/score", scoreRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/questions", questionsRouter);
 
 app.get("/", (req, res) => res.send("Backend OK"));
 

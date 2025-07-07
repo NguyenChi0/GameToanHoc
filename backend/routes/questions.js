@@ -6,6 +6,15 @@ const conn = require("../db");
 router.get("/", (req, res) => {
   const { lesson_id } = req.query;
 
+  // Nếu lesson_id là "all", lấy tất cả câu hỏi
+  if (lesson_id === "all") {
+    conn.query("SELECT * FROM questions", (err, results) => {
+      if (err) return res.status(500).json({ message: "Lỗi server" });
+      return res.json(results);
+    });
+    return;
+  }
+
   if (!lesson_id) {
     return res.status(400).json({ message: "Thiếu lesson_id" });
   }
@@ -14,6 +23,107 @@ router.get("/", (req, res) => {
   conn.query(sql, [lesson_id], (err, results) => {
     if (err) return res.status(500).json({ message: "Lỗi server" });
     res.json(results);
+  });
+});
+
+//api thêm câu hỏi
+router.post("/", (req, res) => {
+  const {
+    lesson_id,
+    content,
+    correct_answer,
+    options,
+    question_type,
+    answer_type,
+    image_url,
+  } = req.body;
+
+  const sql = `
+    INSERT INTO questions 
+    (lesson_id, content, correct_answer, options, question_type, answer_type, image_url) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+  conn.query(
+    sql,
+    [
+      lesson_id,
+      content,
+      correct_answer,
+      options,
+      question_type,
+      answer_type,
+      image_url,
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Lỗi khi thêm câu hỏi:", err);
+        return res
+          .status(500)
+          .json({ message: "Lỗi khi thêm câu hỏi", error: err });
+      }
+      res.json({
+        message: "Thêm câu hỏi thành công",
+        insertedId: result.insertId,
+      });
+    }
+  );
+});
+
+//api cập nhật câu hỏi
+router.put("/:id", (req, res) => {
+  const { id } = req.params;
+  const {
+    lesson_id,
+    content,
+    correct_answer,
+    options,
+    question_type,
+    answer_type,
+    image_url,
+  } = req.body;
+
+  const sql = `
+    UPDATE questions SET 
+      lesson_id = ?, content = ?, correct_answer = ?, options = ?, 
+      question_type = ?, answer_type = ?, image_url = ?
+    WHERE id = ?
+  `;
+  conn.query(
+    sql,
+    [
+      lesson_id,
+      content,
+      correct_answer,
+      options,
+      question_type,
+      answer_type,
+      image_url,
+      id,
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Lỗi khi cập nhật câu hỏi:", err);
+        return res
+          .status(500)
+          .json({ message: "Lỗi khi cập nhật câu hỏi", error: err });
+      }
+      res.json({ message: "Cập nhật câu hỏi thành công" });
+    }
+  );
+});
+
+//api xóa câu hỏi
+router.delete("/:id", (req, res) => {
+  const { id } = req.params;
+  const sql = "DELETE FROM questions WHERE id = ?";
+  conn.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error("Lỗi khi xóa câu hỏi:", err);
+      return res
+        .status(500)
+        .json({ message: "Lỗi khi xóa câu hỏi", error: err });
+    }
+    res.json({ message: "Xóa câu hỏi thành công" });
   });
 });
 
@@ -47,10 +157,10 @@ router.get("/lesson/:lessonId", (req, res) => {
       return res.status(500).json({ message: "Lỗi server", error: err });
     }
 
-
-
     if (results.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy câu hỏi cho bài học này" });
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy câu hỏi cho bài học này" });
     }
 
     // Thông tin bài học
@@ -76,11 +186,15 @@ router.get("/lesson/:lessonId", (req, res) => {
           options = q.options;
         } else {
           // Nếu kiểu khác: ép thành chuỗi và split
-          options = String(q.options).split(",").map((s) => s.trim());
+          options = String(q.options)
+            .split(",")
+            .map((s) => s.trim());
         }
       } catch (e) {
         // Nếu parse JSON thất bại: fallback bằng split
-        options = String(q.options).split(",").map((s) => s.trim());
+        options = String(q.options)
+          .split(",")
+          .map((s) => s.trim());
       }
 
       return {

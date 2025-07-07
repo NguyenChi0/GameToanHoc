@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PAGE_SIZE = 5;
 
@@ -52,12 +54,9 @@ export default function Admin() {
         API.get("/lessons?category_id=all"),
         API.get("/questions?lesson_id=all"),
       ]);
-      console.log("Categories data:", cRes.data);
-      console.log("Lessons data:", lRes.data);
-      console.log("Questions data:", qRes.data);
       setCategories(cRes.data);
       setLessons(lRes.data);
-      setQuestions(qRes.data); // Sửa: qRes.data là mảng các câu hỏi
+      setQuestions(qRes.data);
     } catch (err) {
       console.error("API Error:", err.response?.data || err.message);
     }
@@ -70,18 +69,20 @@ export default function Admin() {
 
   // Category CRUD
   const onCatSubmit = async () => {
-    if (!catForm.name.trim()) return alert("Tên danh mục không được trống");
+    if (!catForm.name.trim())
+      return toast.warning("Tên danh mục không được trống");
     try {
       if (catForm.id) {
         await API.put(`/categories/${catForm.id}`, { name: catForm.name });
+        toast.success("Cập nhật danh mục thành công!");
       } else {
         await API.post("/categories", { name: catForm.name });
+        toast.success("Thêm danh mục mới thành công!");
       }
       setCatForm({ id: null, name: "" });
       loadData();
     } catch (err) {
-      console.error("Lỗi khi lưu danh mục:", err);
-      alert("Có lỗi xảy ra khi lưu danh mục");
+      toast.error("Có lỗi khi lưu danh mục");
     }
   };
 
@@ -91,23 +92,25 @@ export default function Admin() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return;
     try {
       await API.delete(`/categories/${id}`);
+      toast.success("Xóa danh mục thành công!");
       loadData();
     } catch (err) {
-      console.error("Lỗi khi xóa danh mục:", err);
-      alert("Có lỗi xảy ra khi xóa danh mục");
+      toast.error("Lỗi khi xóa danh mục");
     }
   };
 
   // Lesson CRUD
   const onLesSubmit = async () => {
     if (!lesForm.name || !lesForm.category_id)
-      return alert("Vui lòng điền đầy đủ thông tin bài học");
+      return toast.warning("Vui lòng điền đầy đủ thông tin bài học");
 
     try {
       if (lesForm.id) {
         await API.put(`/lessons/${lesForm.id}`, lesForm);
+        toast.success("Cập nhật bài học thành công!");
       } else {
         await API.post("/lessons", lesForm);
+        toast.success("Thêm bài học mới thành công!");
       }
       setLesForm({
         id: null,
@@ -120,41 +123,31 @@ export default function Admin() {
       });
       loadData();
     } catch (err) {
-      console.error("Lỗi khi lưu bài học:", err);
-      alert("Có lỗi xảy ra khi lưu bài học");
+      toast.error("Lỗi khi lưu bài học");
     }
   };
 
-  const onLesEdit = (l) =>
-    setLesForm({
-      id: l.id,
-      category_id: l.category_id,
-      name: l.name,
-      required_score: l.required_score,
-      operation: l.operation,
-      level: l.level,
-      type: l.type,
-    });
+  const onLesEdit = (l) => setLesForm({ ...l });
 
   const onLesDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bài học này?")) return;
     try {
       await API.delete(`/lessons/${id}`);
+      toast.success("Xóa bài học thành công!");
       loadData();
     } catch (err) {
-      console.error("Lỗi khi xóa bài học:", err);
-      alert("Có lỗi xảy ra khi xóa bài học");
+      toast.error("Lỗi khi xóa bài học");
     }
   };
 
   // Question CRUD
   const onQuesSubmit = async () => {
     if (!quesForm.lesson_id || !quesForm.content.trim())
-      return alert("Vui lòng điền đầy đủ thông tin câu hỏi");
+      return toast.warning("Vui lòng điền đầy đủ thông tin câu hỏi");
 
-    // Kiểm tra options
     const hasEmptyOption = quesForm.options.some((opt) => !opt.trim());
-    if (hasEmptyOption) return alert("Các lựa chọn không được để trống");
+    if (hasEmptyOption)
+      return toast.warning("Các lựa chọn không được để trống");
 
     try {
       const payload = {
@@ -164,8 +157,10 @@ export default function Admin() {
 
       if (quesForm.id) {
         await API.put(`/questions/${quesForm.id}`, payload);
+        toast.success("Cập nhật câu hỏi thành công!");
       } else {
         await API.post("/questions", payload);
+        toast.success("Thêm câu hỏi thành công!");
       }
 
       setQuesForm({
@@ -180,8 +175,7 @@ export default function Admin() {
       });
       loadData();
     } catch (err) {
-      console.error("Lỗi khi lưu câu hỏi:", err);
-      alert("Có lỗi xảy ra khi lưu câu hỏi");
+      toast.error("Lỗi khi lưu câu hỏi");
     }
   };
 
@@ -199,34 +193,21 @@ export default function Admin() {
         .split(",")
         .map((s) => s.trim());
     }
-
-    // Đảm bảo luôn có 4 options
     while (options.length < 4) options.push("");
-
-    setQuesForm({
-      id: q.id,
-      lesson_id: q.lesson_id,
-      content: q.content,
-      options,
-      correct_answer: q.correct_answer,
-      question_type: q.question_type,
-      answer_type: q.answer_type,
-      image_url: q.image_url,
-    });
+    setQuesForm({ ...q, options });
   };
 
   const onQuesDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?")) return;
     try {
       await API.delete(`/questions/${id}`);
+      toast.success("Xóa câu hỏi thành công!");
       loadData();
     } catch (err) {
-      console.error("Lỗi khi xóa câu hỏi:", err);
-      alert("Có lỗi xảy ra khi xóa câu hỏi");
+      toast.error("Lỗi khi xóa câu hỏi");
     }
   };
 
-  // Filters & pages
   const filteredCats = categories.filter((c) =>
     c.name.toLowerCase().includes(catSearch.toLowerCase())
   );
@@ -240,7 +221,6 @@ export default function Admin() {
   const pagedLes = paginate(filteredLes, lesPage);
   const pagedQues = paginate(filteredQues, quesPage);
 
-  // Tìm tên bài học cho câu hỏi
   const getLessonName = (lessonId) => {
     const lesson = lessons.find((l) => l.id === lessonId);
     return lesson ? lesson.name : `ID: ${lessonId}`;
@@ -255,6 +235,7 @@ export default function Admin() {
         margin: "0 auto",
       }}
     >
+      <ToastContainer position="top-right" autoClose={3000} />
       <h1>📋 Quản trị hệ thống</h1>
       <div style={{ margin: "20px 0", display: "flex", gap: 10 }}>
         <button
@@ -297,7 +278,6 @@ export default function Admin() {
           Câu hỏi
         </button>
       </div>
-
       {/* Categories Tab */}
       {tab === "categories" && (
         <div>
@@ -450,7 +430,7 @@ export default function Admin() {
             </button>
             <span style={{ fontWeight: "bold" }}>
               {" "}
-              Trang {catPage} của {Math.ceil(filteredCats.length / PAGE_SIZE)}{" "}
+              Trang {catPage} trên {Math.ceil(filteredCats.length / PAGE_SIZE)}{" "}
             </span>
             <button
               disabled={catPage * PAGE_SIZE >= filteredCats.length}
@@ -475,7 +455,6 @@ export default function Admin() {
           </div>
         </div>
       )}
-
       {/* Lessons Tab */}
       {tab === "lessons" && (
         <div>
@@ -574,7 +553,7 @@ export default function Admin() {
                   setLesForm({ ...lesForm, operation: e.target.value })
                 }
                 style={{ width: "100%", padding: 8 }}
-                placeholder="e.g., +, -, ×, ÷"
+                placeholder="vd: cộng, trừ, nhân, chia, hỗn hợp"
               />
             </div>
 
@@ -781,7 +760,7 @@ export default function Admin() {
             </button>
             <span style={{ fontWeight: "bold" }}>
               {" "}
-              Trang {lesPage} của {Math.ceil(filteredLes.length / PAGE_SIZE)}{" "}
+              Trang {lesPage} trên {Math.ceil(filteredLes.length / PAGE_SIZE)}{" "}
             </span>
             <button
               disabled={lesPage * PAGE_SIZE >= filteredLes.length}
@@ -806,7 +785,6 @@ export default function Admin() {
           </div>
         </div>
       )}
-
       {/* Questions Tab */}
       {tab === "questions" && (
         <div>
@@ -1149,7 +1127,7 @@ export default function Admin() {
             </button>
             <span style={{ fontWeight: "bold" }}>
               {" "}
-              Trang {quesPage} của {Math.ceil(filteredQues.length / PAGE_SIZE)}{" "}
+              Trang {quesPage} trên {Math.ceil(filteredQues.length / PAGE_SIZE)}{" "}
             </span>
             <button
               disabled={quesPage * PAGE_SIZE >= filteredQues.length}

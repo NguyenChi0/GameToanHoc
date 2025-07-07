@@ -19,7 +19,7 @@ const questionsRouter = require("./routes/questions");
 
 // Sử dụng route
 app.use("/api/auth", authRoutes);
-app.use("/api/score", scoreRoutes); // ⬅ endpoint lưu điểm
+app.use("/api/score", scoreRoutes); 
 app.use("/api/categories", categoryRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/results", resultRoutes);

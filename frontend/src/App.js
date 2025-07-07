@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import DangNhap from "./pages/DangNhap";
 import DangKy from "./pages/Dangky";
 import Admin from "./pages/Admin";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const [username, setUsername] = useState(null);

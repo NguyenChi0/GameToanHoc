@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
   `;
   const params = [];
 
-  if (category_id) {
+  if (category_id && category_id !== "all") {
     sql += " WHERE lessons.category_id = ?";
     params.push(category_id);
   }

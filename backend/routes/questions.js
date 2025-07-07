@@ -6,6 +6,15 @@ const conn = require("../db");
 router.get("/", (req, res) => {
   const { lesson_id } = req.query;
 
+  // Nếu lesson_id là "all", lấy tất cả câu hỏi
+  if (lesson_id === "all") {
+    conn.query("SELECT * FROM questions", (err, results) => {
+      if (err) return res.status(500).json({ message: "Lỗi server" });
+      return res.json(results);
+    });
+    return;
+  }
+
   if (!lesson_id) {
     return res.status(400).json({ message: "Thiếu lesson_id" });
   }
@@ -47,10 +56,10 @@ router.get("/lesson/:lessonId", (req, res) => {
       return res.status(500).json({ message: "Lỗi server", error: err });
     }
 
-
-
     if (results.length === 0) {
-      return res.status(404).json({ message: "Không tìm thấy câu hỏi cho bài học này" });
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy câu hỏi cho bài học này" });
     }
 
     // Thông tin bài học
@@ -76,11 +85,15 @@ router.get("/lesson/:lessonId", (req, res) => {
           options = q.options;
         } else {
           // Nếu kiểu khác: ép thành chuỗi và split
-          options = String(q.options).split(",").map((s) => s.trim());
+          options = String(q.options)
+            .split(",")
+            .map((s) => s.trim());
         }
       } catch (e) {
         // Nếu parse JSON thất bại: fallback bằng split
-        options = String(q.options).split(",").map((s) => s.trim());
+        options = String(q.options)
+          .split(",")
+          .map((s) => s.trim());
       }
 
       return {

@@ -1,0 +1,5 @@
+// frontend
+npm install react-router-dom axios react-toastify
+
+//backend
+npm install express mysql2 cors dotenv jsonwebtoken bcryptjs

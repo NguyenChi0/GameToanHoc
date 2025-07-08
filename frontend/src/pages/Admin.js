@@ -23,10 +23,11 @@ export default function Admin() {
     required_score: 0,
     operation: "",
     level: 1,
-    type: "arithmetic",
+    type: "số học",
   });
   const [lesPage, setLesPage] = useState(1);
   const [lesSearch, setLesSearch] = useState("");
+  const [lesFilterCategory, setLesFilterCategory] = useState(""); // New filter state for lessons
 
   // State for Questions
   const [questions, setQuestions] = useState([]);
@@ -42,6 +43,8 @@ export default function Admin() {
   });
   const [quesPage, setQuesPage] = useState(1);
   const [quesSearch, setQuesSearch] = useState("");
+  const [quesFilterCategory, setQuesFilterCategory] = useState(""); // New filter state for questions
+  const [quesFilterLesson, setQuesFilterLesson] = useState(""); // New filter state for questions
 
   useEffect(() => {
     loadData();
@@ -119,7 +122,7 @@ export default function Admin() {
         required_score: 0,
         operation: "",
         level: 1,
-        type: "arithmetic",
+        type: "số học",
       });
       loadData();
     } catch (err) {
@@ -208,15 +211,28 @@ export default function Admin() {
     }
   };
 
+  // Filtered data with new filters
   const filteredCats = categories.filter((c) =>
     c.name.toLowerCase().includes(catSearch.toLowerCase())
   );
-  const filteredLes = lessons.filter((l) =>
-    l.name.toLowerCase().includes(lesSearch.toLowerCase())
-  );
-  const filteredQues = questions.filter((q) =>
-    q.content.toLowerCase().includes(quesSearch.toLowerCase())
-  );
+
+  const filteredLes = lessons
+    .filter((l) => l.name.toLowerCase().includes(lesSearch.toLowerCase()))
+    .filter((l) =>
+      lesFilterCategory ? l.category_id == lesFilterCategory : true
+    );
+
+  const filteredQues = questions
+    .filter((q) => q.content.toLowerCase().includes(quesSearch.toLowerCase()))
+    .filter((q) => {
+      if (quesFilterLesson) return q.lesson_id == quesFilterLesson;
+      if (quesFilterCategory) {
+        const lesson = lessons.find((l) => l.id === q.lesson_id);
+        return lesson && lesson.category_id == quesFilterCategory;
+      }
+      return true;
+    });
+
   const pagedCats = paginate(filteredCats, catPage);
   const pagedLes = paginate(filteredLes, lesPage);
   const pagedQues = paginate(filteredQues, quesPage);
@@ -595,8 +611,8 @@ export default function Admin() {
                 }
                 style={{ width: "100%", padding: 8 }}
               >
-                <option value="arithmetic">Số học</option>
-                <option value="visual">Thị giác</option>
+                <option value="số học">Số học</option>
+                <option value="thị giác">Thị giác</option>
               </select>
             </div>
 
@@ -632,7 +648,7 @@ export default function Admin() {
                       required_score: 0,
                       operation: "",
                       level: 1,
-                      type: "arithmetic",
+                      type: "số học",
                     })
                   }
                   style={{
@@ -651,14 +667,45 @@ export default function Admin() {
             </div>
           </div>
 
-          <div style={{ marginBottom: 15 }}>
-            <label style={{ fontWeight: "bold" }}>Tìm kiếm: </label>
-            <input
-              value={lesSearch}
-              onChange={(e) => setLesSearch(e.target.value)}
-              style={{ padding: 8, width: 300 }}
-              placeholder="Tìm kiếm bài học..."
-            />
+          {/* New filter section for lessons */}
+          <div
+            style={{
+              marginBottom: 15,
+              display: "flex",
+              gap: 10,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Lọc theo danh mục:{" "}
+              </label>
+              <select
+                value={lesFilterCategory}
+                onChange={(e) => setLesFilterCategory(e.target.value)}
+                style={{ padding: 8, width: 200 }}
+              >
+                <option value="">Tất cả danh mục</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Tìm kiếm:{" "}
+              </label>
+              <input
+                value={lesSearch}
+                onChange={(e) => setLesSearch(e.target.value)}
+                style={{ padding: 8, width: 300 }}
+                placeholder="Tìm kiếm bài học..."
+              />
+            </div>
           </div>
 
           <table
@@ -1022,14 +1069,72 @@ export default function Admin() {
             </div>
           </div>
 
-          <div style={{ marginBottom: 15 }}>
-            <label style={{ fontWeight: "bold" }}>Tìm kiếm: </label>
-            <input
-              value={quesSearch}
-              onChange={(e) => setQuesSearch(e.target.value)}
-              style={{ padding: 8, width: 300 }}
-              placeholder="Tìm kiếm câu hỏi..."
-            />
+          {/* New filter section for questions */}
+          <div
+            style={{
+              marginBottom: 15,
+              display: "flex",
+              gap: 10,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Lọc theo danh mục:{" "}
+              </label>
+              <select
+                value={quesFilterCategory}
+                onChange={(e) => {
+                  setQuesFilterCategory(e.target.value);
+                  setQuesFilterLesson(""); // Reset bài học khi đổi danh mục
+                }}
+                style={{ padding: 8, width: 200 }}
+              >
+                <option value="">Tất cả danh mục</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Lọc theo bài học:{" "}
+              </label>
+              <select
+                value={quesFilterLesson}
+                onChange={(e) => setQuesFilterLesson(e.target.value)}
+                style={{ padding: 8, width: 250 }}
+              >
+                <option value="">Tất cả bài học</option>
+                {lessons
+                  .filter((l) =>
+                    quesFilterCategory
+                      ? l.category_id == quesFilterCategory
+                      : true
+                  )
+                  .map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.name} (ID: {l.id})
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Tìm kiếm:{" "}
+              </label>
+              <input
+                value={quesSearch}
+                onChange={(e) => setQuesSearch(e.target.value)}
+                style={{ padding: 8, width: 300 }}
+                placeholder="Tìm kiếm câu hỏi..."
+              />
+            </div>
           </div>
 
           <table

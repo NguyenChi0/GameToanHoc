@@ -5,6 +5,16 @@ import "react-toastify/dist/ReactToastify.css";
 
 const PAGE_SIZE = 5;
 
+// Hàm loại bỏ dấu để hỗ trợ tìm kiếm gần đúng
+const removeAccents = (str) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+};
+
 export default function Admin() {
   const [tab, setTab] = useState("categories");
 
@@ -27,7 +37,7 @@ export default function Admin() {
   });
   const [lesPage, setLesPage] = useState(1);
   const [lesSearch, setLesSearch] = useState("");
-  const [lesFilterCategory, setLesFilterCategory] = useState(""); // New filter state for lessons
+  const [lesFilterCategory, setLesFilterCategory] = useState("");
 
   // State for Questions
   const [questions, setQuestions] = useState([]);
@@ -43,8 +53,8 @@ export default function Admin() {
   });
   const [quesPage, setQuesPage] = useState(1);
   const [quesSearch, setQuesSearch] = useState("");
-  const [quesFilterCategory, setQuesFilterCategory] = useState(""); // New filter state for questions
-  const [quesFilterLesson, setQuesFilterLesson] = useState(""); // New filter state for questions
+  const [quesFilterCategory, setQuesFilterCategory] = useState("");
+  const [quesFilterLesson, setQuesFilterLesson] = useState("");
 
   useEffect(() => {
     loadData();
@@ -73,19 +83,21 @@ export default function Admin() {
   // Category CRUD
   const onCatSubmit = async () => {
     if (!catForm.name.trim())
-      return toast.warning("Tên danh mục không được trống");
+      return toast.warning("Tên danh mục không được trống", {
+        autoClose: 3000,
+      });
     try {
       if (catForm.id) {
         await API.put(`/categories/${catForm.id}`, { name: catForm.name });
-        toast.success("Cập nhật danh mục thành công!");
+        toast.success("Cập nhật danh mục thành công!", { autoClose: 3000 });
       } else {
         await API.post("/categories", { name: catForm.name });
-        toast.success("Thêm danh mục mới thành công!");
+        toast.success("Thêm danh mục mới thành công!", { autoClose: 3000 });
       }
       setCatForm({ id: null, name: "" });
       loadData();
     } catch (err) {
-      toast.error("Có lỗi khi lưu danh mục");
+      toast.error("Có lỗi khi lưu danh mục", { autoClose: 3000 });
     }
   };
 
@@ -95,25 +107,33 @@ export default function Admin() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return;
     try {
       await API.delete(`/categories/${id}`);
-      toast.success("Xóa danh mục thành công!");
+      toast.success("Xóa danh mục thành công!", { autoClose: 3000 });
+
+      // Reset form if deleting the currently edited category
+      if (catForm.id === id) {
+        setCatForm({ id: null, name: "" });
+      }
+
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi xóa danh mục");
+      toast.error("Lỗi khi xóa danh mục", { autoClose: 3000 });
     }
   };
 
   // Lesson CRUD
   const onLesSubmit = async () => {
     if (!lesForm.name || !lesForm.category_id)
-      return toast.warning("Vui lòng điền đầy đủ thông tin bài học");
+      return toast.warning("Vui lòng điền đầy đủ thông tin bài học", {
+        autoClose: 3000,
+      });
 
     try {
       if (lesForm.id) {
         await API.put(`/lessons/${lesForm.id}`, lesForm);
-        toast.success("Cập nhật bài học thành công!");
+        toast.success("Cập nhật bài học thành công!", { autoClose: 3000 });
       } else {
         await API.post("/lessons", lesForm);
-        toast.success("Thêm bài học mới thành công!");
+        toast.success("Thêm bài học mới thành công!", { autoClose: 3000 });
       }
       setLesForm({
         id: null,
@@ -126,7 +146,7 @@ export default function Admin() {
       });
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi lưu bài học");
+      toast.error("Lỗi khi lưu bài học", { autoClose: 3000 });
     }
   };
 
@@ -136,21 +156,39 @@ export default function Admin() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bài học này?")) return;
     try {
       await API.delete(`/lessons/${id}`);
-      toast.success("Xóa bài học thành công!");
+      toast.success("Xóa bài học thành công!", { autoClose: 3000 });
+
+      // Reset form if deleting the currently edited lesson
+      if (lesForm.id === id) {
+        setLesForm({
+          id: null,
+          category_id: "",
+          name: "",
+          required_score: 0,
+          operation: "",
+          level: 1,
+          type: "số học",
+        });
+      }
+
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi xóa bài học");
+      toast.error("Lỗi khi xóa bài học", { autoClose: 3000 });
     }
   };
 
   // Question CRUD
   const onQuesSubmit = async () => {
     if (!quesForm.lesson_id || !quesForm.content.trim())
-      return toast.warning("Vui lòng điền đầy đủ thông tin câu hỏi");
+      return toast.warning("Vui lòng điền đầy đủ thông tin câu hỏi", {
+        autoClose: 3000,
+      });
 
     const hasEmptyOption = quesForm.options.some((opt) => !opt.trim());
     if (hasEmptyOption)
-      return toast.warning("Các lựa chọn không được để trống");
+      return toast.warning("Các lựa chọn không được để trống", {
+        autoClose: 3000,
+      });
 
     try {
       const payload = {
@@ -160,10 +198,10 @@ export default function Admin() {
 
       if (quesForm.id) {
         await API.put(`/questions/${quesForm.id}`, payload);
-        toast.success("Cập nhật câu hỏi thành công!");
+        toast.success("Cập nhật câu hỏi thành công!", { autoClose: 3000 });
       } else {
         await API.post("/questions", payload);
-        toast.success("Thêm câu hỏi thành công!");
+        toast.success("Thêm câu hỏi thành công!", { autoClose: 3000 });
       }
 
       setQuesForm({
@@ -178,7 +216,7 @@ export default function Admin() {
       });
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi lưu câu hỏi");
+      toast.error("Lỗi khi lưu câu hỏi", { autoClose: 3000 });
     }
   };
 
@@ -204,26 +242,41 @@ export default function Admin() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?")) return;
     try {
       await API.delete(`/questions/${id}`);
-      toast.success("Xóa câu hỏi thành công!");
+      toast.success("Xóa câu hỏi thành công!", { autoClose: 3000 });
+
+      // Reset form if deleting the currently edited question
+      if (quesForm.id === id) {
+        setQuesForm({
+          id: null,
+          lesson_id: "",
+          content: "",
+          options: ["", "", "", ""],
+          correct_answer: "",
+          question_type: "text",
+          answer_type: "text",
+          image_url: "",
+        });
+      }
+
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi xóa câu hỏi");
+      toast.error("Lỗi khi xóa câu hỏi", { autoClose: 3000 });
     }
   };
 
-  // Filtered data with new filters
+  // Filtered data with accent-insensitive search
   const filteredCats = categories.filter((c) =>
-    c.name.toLowerCase().includes(catSearch.toLowerCase())
+    removeAccents(c.name).includes(removeAccents(catSearch))
   );
 
   const filteredLes = lessons
-    .filter((l) => l.name.toLowerCase().includes(lesSearch.toLowerCase()))
+    .filter((l) => removeAccents(l.name).includes(removeAccents(lesSearch)))
     .filter((l) =>
       lesFilterCategory ? l.category_id == lesFilterCategory : true
     );
 
   const filteredQues = questions
-    .filter((q) => q.content.toLowerCase().includes(quesSearch.toLowerCase()))
+    .filter((q) => removeAccents(q.content).includes(removeAccents(quesSearch)))
     .filter((q) => {
       if (quesFilterLesson) return q.lesson_id == quesFilterLesson;
       if (quesFilterCategory) {
@@ -251,7 +304,15 @@ export default function Admin() {
         margin: "0 auto",
       }}
     >
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light"
+        style={{ marginTop: "50px" }}
+      />
       <h1>📋 Quản trị hệ thống</h1>
       <div style={{ margin: "20px 0", display: "flex", gap: 10 }}>
         <button

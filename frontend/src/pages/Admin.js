@@ -235,7 +235,12 @@ export default function Admin() {
         .map((s) => s.trim());
     }
     while (options.length < 4) options.push("");
-    setQuesForm({ ...q, options });
+
+    // Tìm bài học tương ứng để thiết lập danh mục
+    const lesson = lessons.find((l) => l.id === q.lesson_id);
+    const category_id = lesson ? lesson.category_id : "";
+
+    setQuesForm({ ...q, options, category_id });
   };
 
   const onQuesDelete = async (id) => {
@@ -295,6 +300,35 @@ export default function Admin() {
     return lesson ? lesson.name : `ID: ${lessonId}`;
   };
 
+  // Lấy danh sách bài học theo danh mục
+  const getLessonsByCategory = (categoryId) => {
+    return lessons.filter((l) => l.category_id == categoryId);
+  };
+
+  // Xử lý khi chọn danh mục trong form câu hỏi
+  const handleCategoryChange = (e) => {
+    const category_id = e.target.value;
+    setQuesForm({
+      ...quesForm,
+      category_id,
+      // Reset lesson_id nếu danh mục thay đổi
+      lesson_id: category_id === quesForm.category_id ? quesForm.lesson_id : "",
+    });
+  };
+
+  // Xử lý khi chọn bài học trong form câu hỏi
+  const handleLessonChange = (e) => {
+    const lesson_id = e.target.value;
+    const lesson = lessons.find((l) => l.id == lesson_id);
+
+    setQuesForm({
+      ...quesForm,
+      lesson_id,
+      // Tự động cập nhật danh mục nếu có bài học
+      category_id: lesson ? lesson.category_id : quesForm.category_id,
+    });
+  };
+
   return (
     <div
       style={{
@@ -304,15 +338,6 @@ export default function Admin() {
         margin: "0 auto",
       }}
     >
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        closeOnClick
-        pauseOnHover
-        draggable
-        theme="light"
-        style={{ marginTop: "50px" }}
-      />
       <h1>📋 Quản trị hệ thống</h1>
       <div style={{ margin: "20px 0", display: "flex", gap: 10 }}>
         <button
@@ -908,6 +933,31 @@ export default function Admin() {
               gap: 15,
             }}
           >
+            {/* Thêm trường chọn danh mục */}
+            <div>
+              <label
+                style={{
+                  fontWeight: "bold",
+                  display: "block",
+                  marginBottom: 5,
+                }}
+              >
+                Danh mục:{" "}
+              </label>
+              <select
+                value={quesForm.category_id}
+                onChange={handleCategoryChange}
+                style={{ width: "100%", padding: 8 }}
+              >
+                <option value="">--Chọn danh mục--</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label
                 style={{
@@ -920,13 +970,11 @@ export default function Admin() {
               </label>
               <select
                 value={quesForm.lesson_id}
-                onChange={(e) =>
-                  setQuesForm({ ...quesForm, lesson_id: e.target.value })
-                }
+                onChange={handleLessonChange}
                 style={{ width: "100%", padding: 8 }}
               >
                 <option value="">--Chọn bài học--</option>
-                {lessons.map((l) => (
+                {getLessonsByCategory(quesForm.category_id).map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name} (ID: {l.id})
                   </option>
@@ -950,7 +998,7 @@ export default function Admin() {
                   setQuesForm({ ...quesForm, content: e.target.value })
                 }
                 style={{ width: "100%", padding: 8, minHeight: 80 }}
-                placeholder="Nội dumg câu hỏi..."
+                placeholder="Nội dung câu hỏi..."
               />
             </div>
 

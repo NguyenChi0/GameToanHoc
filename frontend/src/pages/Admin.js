@@ -765,6 +765,17 @@ export default function Admin() {
           >
             <div>
               <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Tìm kiếm:{" "}
+              </label>
+              <input
+                value={lesSearch}
+                onChange={(e) => setLesSearch(e.target.value)}
+                style={{ padding: 8, width: 300 }}
+                placeholder="Tìm kiếm bài học..."
+              />
+            </div>{" "}
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
                 Lọc theo danh mục:{" "}
               </label>
               <select
@@ -779,18 +790,6 @@ export default function Admin() {
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label style={{ fontWeight: "bold", marginRight: 5 }}>
-                Tìm kiếm:{" "}
-              </label>
-              <input
-                value={lesSearch}
-                onChange={(e) => setLesSearch(e.target.value)}
-                style={{ padding: 8, width: 300 }}
-                placeholder="Tìm kiếm bài học..."
-              />
             </div>
           </div>
 
@@ -1190,6 +1189,17 @@ export default function Admin() {
           >
             <div>
               <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Tìm kiếm:{" "}
+              </label>
+              <input
+                value={quesSearch}
+                onChange={(e) => setQuesSearch(e.target.value)}
+                style={{ padding: 8, width: 300 }}
+                placeholder="Tìm kiếm câu hỏi..."
+              />
+            </div>{" "}
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
                 Lọc theo danh mục:{" "}
               </label>
               <select
@@ -1208,7 +1218,6 @@ export default function Admin() {
                 ))}
               </select>
             </div>
-
             <div>
               <label style={{ fontWeight: "bold", marginRight: 5 }}>
                 Lọc theo bài học:{" "}
@@ -1231,18 +1240,6 @@ export default function Admin() {
                     </option>
                   ))}
               </select>
-            </div>
-
-            <div>
-              <label style={{ fontWeight: "bold", marginRight: 5 }}>
-                Tìm kiếm:{" "}
-              </label>
-              <input
-                value={quesSearch}
-                onChange={(e) => setQuesSearch(e.target.value)}
-                style={{ padding: 8, width: 300 }}
-                placeholder="Tìm kiếm câu hỏi..."
-              />
             </div>
           </div>
 

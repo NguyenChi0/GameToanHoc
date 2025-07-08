@@ -65,7 +65,16 @@ function App() {
           <Route path="/game/:lessonId" element={<GamePage />} />
         </Routes>
 
-        <ToastContainer position="top-right" autoClose={3000} />
+        {/* <ToastContainer position="top-right" autoClose={3000} /> */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          closeOnClick
+          pauseOnHover
+          draggable
+          theme="light"
+          style={{ marginTop: "15px" }}
+        />
       </div>
     </BrowserRouter>
   );

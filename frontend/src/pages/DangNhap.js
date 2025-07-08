@@ -15,10 +15,10 @@ export default function DangNhap({ setUsername }) {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("username", res.data.username);
       setUsername(res.data.username);
-      toast.success(`✅ Xin chào ${res.data.username}`);
+      toast.success(`Đăng nhập thành công, xin chào ${res.data.username}`);
       navigate("/");
     } catch (err) {
-      toast.error("❌ Sai tài khoản hoặc mật khẩu!");
+      toast.error("Sai tài khoản hoặc mật khẩu!");
     }
   };
 

@@ -5,6 +5,16 @@ import "react-toastify/dist/ReactToastify.css";
 
 const PAGE_SIZE = 5;
 
+// Hàm loại bỏ dấu để hỗ trợ tìm kiếm gần đúng
+const removeAccents = (str) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+};
+
 export default function Admin() {
   const [tab, setTab] = useState("categories");
 
@@ -23,10 +33,11 @@ export default function Admin() {
     required_score: 0,
     operation: "",
     level: 1,
-    type: "arithmetic",
+    type: "số học",
   });
   const [lesPage, setLesPage] = useState(1);
   const [lesSearch, setLesSearch] = useState("");
+  const [lesFilterCategory, setLesFilterCategory] = useState("");
 
   // State for Questions
   const [questions, setQuestions] = useState([]);
@@ -42,6 +53,8 @@ export default function Admin() {
   });
   const [quesPage, setQuesPage] = useState(1);
   const [quesSearch, setQuesSearch] = useState("");
+  const [quesFilterCategory, setQuesFilterCategory] = useState("");
+  const [quesFilterLesson, setQuesFilterLesson] = useState("");
 
   useEffect(() => {
     loadData();
@@ -70,19 +83,21 @@ export default function Admin() {
   // Category CRUD
   const onCatSubmit = async () => {
     if (!catForm.name.trim())
-      return toast.warning("Tên danh mục không được trống");
+      return toast.warning("Tên danh mục không được trống", {
+        autoClose: 3000,
+      });
     try {
       if (catForm.id) {
         await API.put(`/categories/${catForm.id}`, { name: catForm.name });
-        toast.success("Cập nhật danh mục thành công!");
+        toast.success("Cập nhật danh mục thành công!", { autoClose: 3000 });
       } else {
         await API.post("/categories", { name: catForm.name });
-        toast.success("Thêm danh mục mới thành công!");
+        toast.success("Thêm danh mục mới thành công!", { autoClose: 3000 });
       }
       setCatForm({ id: null, name: "" });
       loadData();
     } catch (err) {
-      toast.error("Có lỗi khi lưu danh mục");
+      toast.error("Có lỗi khi lưu danh mục", { autoClose: 3000 });
     }
   };
 
@@ -92,25 +107,33 @@ export default function Admin() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return;
     try {
       await API.delete(`/categories/${id}`);
-      toast.success("Xóa danh mục thành công!");
+      toast.success("Xóa danh mục thành công!", { autoClose: 3000 });
+
+      // Reset form if deleting the currently edited category
+      if (catForm.id === id) {
+        setCatForm({ id: null, name: "" });
+      }
+
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi xóa danh mục");
+      toast.error("Lỗi khi xóa danh mục", { autoClose: 3000 });
     }
   };
 
   // Lesson CRUD
   const onLesSubmit = async () => {
     if (!lesForm.name || !lesForm.category_id)
-      return toast.warning("Vui lòng điền đầy đủ thông tin bài học");
+      return toast.warning("Vui lòng điền đầy đủ thông tin bài học", {
+        autoClose: 3000,
+      });
 
     try {
       if (lesForm.id) {
         await API.put(`/lessons/${lesForm.id}`, lesForm);
-        toast.success("Cập nhật bài học thành công!");
+        toast.success("Cập nhật bài học thành công!", { autoClose: 3000 });
       } else {
         await API.post("/lessons", lesForm);
-        toast.success("Thêm bài học mới thành công!");
+        toast.success("Thêm bài học mới thành công!", { autoClose: 3000 });
       }
       setLesForm({
         id: null,
@@ -119,11 +142,11 @@ export default function Admin() {
         required_score: 0,
         operation: "",
         level: 1,
-        type: "arithmetic",
+        type: "số học",
       });
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi lưu bài học");
+      toast.error("Lỗi khi lưu bài học", { autoClose: 3000 });
     }
   };
 
@@ -133,21 +156,39 @@ export default function Admin() {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bài học này?")) return;
     try {
       await API.delete(`/lessons/${id}`);
-      toast.success("Xóa bài học thành công!");
+      toast.success("Xóa bài học thành công!", { autoClose: 3000 });
+
+      // Reset form if deleting the currently edited lesson
+      if (lesForm.id === id) {
+        setLesForm({
+          id: null,
+          category_id: "",
+          name: "",
+          required_score: 0,
+          operation: "",
+          level: 1,
+          type: "số học",
+        });
+      }
+
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi xóa bài học");
+      toast.error("Lỗi khi xóa bài học", { autoClose: 3000 });
     }
   };
 
   // Question CRUD
   const onQuesSubmit = async () => {
     if (!quesForm.lesson_id || !quesForm.content.trim())
-      return toast.warning("Vui lòng điền đầy đủ thông tin câu hỏi");
+      return toast.warning("Vui lòng điền đầy đủ thông tin câu hỏi", {
+        autoClose: 3000,
+      });
 
     const hasEmptyOption = quesForm.options.some((opt) => !opt.trim());
     if (hasEmptyOption)
-      return toast.warning("Các lựa chọn không được để trống");
+      return toast.warning("Các lựa chọn không được để trống", {
+        autoClose: 3000,
+      });
 
     try {
       const payload = {
@@ -157,10 +198,10 @@ export default function Admin() {
 
       if (quesForm.id) {
         await API.put(`/questions/${quesForm.id}`, payload);
-        toast.success("Cập nhật câu hỏi thành công!");
+        toast.success("Cập nhật câu hỏi thành công!", { autoClose: 3000 });
       } else {
         await API.post("/questions", payload);
-        toast.success("Thêm câu hỏi thành công!");
+        toast.success("Thêm câu hỏi thành công!", { autoClose: 3000 });
       }
 
       setQuesForm({
@@ -175,7 +216,7 @@ export default function Admin() {
       });
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi lưu câu hỏi");
+      toast.error("Lỗi khi lưu câu hỏi", { autoClose: 3000 });
     }
   };
 
@@ -194,29 +235,62 @@ export default function Admin() {
         .map((s) => s.trim());
     }
     while (options.length < 4) options.push("");
-    setQuesForm({ ...q, options });
+
+    // Tìm bài học tương ứng để thiết lập danh mục
+    const lesson = lessons.find((l) => l.id === q.lesson_id);
+    const category_id = lesson ? lesson.category_id : "";
+
+    setQuesForm({ ...q, options, category_id });
   };
 
   const onQuesDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?")) return;
     try {
       await API.delete(`/questions/${id}`);
-      toast.success("Xóa câu hỏi thành công!");
+      toast.success("Xóa câu hỏi thành công!", { autoClose: 3000 });
+
+      // Reset form if deleting the currently edited question
+      if (quesForm.id === id) {
+        setQuesForm({
+          id: null,
+          lesson_id: "",
+          content: "",
+          options: ["", "", "", ""],
+          correct_answer: "",
+          question_type: "text",
+          answer_type: "text",
+          image_url: "",
+        });
+      }
+
       loadData();
     } catch (err) {
-      toast.error("Lỗi khi xóa câu hỏi");
+      toast.error("Lỗi khi xóa câu hỏi", { autoClose: 3000 });
     }
   };
 
+  // Filtered data with accent-insensitive search
   const filteredCats = categories.filter((c) =>
-    c.name.toLowerCase().includes(catSearch.toLowerCase())
+    removeAccents(c.name).includes(removeAccents(catSearch))
   );
-  const filteredLes = lessons.filter((l) =>
-    l.name.toLowerCase().includes(lesSearch.toLowerCase())
-  );
-  const filteredQues = questions.filter((q) =>
-    q.content.toLowerCase().includes(quesSearch.toLowerCase())
-  );
+
+  const filteredLes = lessons
+    .filter((l) => removeAccents(l.name).includes(removeAccents(lesSearch)))
+    .filter((l) =>
+      lesFilterCategory ? l.category_id == lesFilterCategory : true
+    );
+
+  const filteredQues = questions
+    .filter((q) => removeAccents(q.content).includes(removeAccents(quesSearch)))
+    .filter((q) => {
+      if (quesFilterLesson) return q.lesson_id == quesFilterLesson;
+      if (quesFilterCategory) {
+        const lesson = lessons.find((l) => l.id === q.lesson_id);
+        return lesson && lesson.category_id == quesFilterCategory;
+      }
+      return true;
+    });
+
   const pagedCats = paginate(filteredCats, catPage);
   const pagedLes = paginate(filteredLes, lesPage);
   const pagedQues = paginate(filteredQues, quesPage);
@@ -224,6 +298,35 @@ export default function Admin() {
   const getLessonName = (lessonId) => {
     const lesson = lessons.find((l) => l.id === lessonId);
     return lesson ? lesson.name : `ID: ${lessonId}`;
+  };
+
+  // Lấy danh sách bài học theo danh mục
+  const getLessonsByCategory = (categoryId) => {
+    return lessons.filter((l) => l.category_id == categoryId);
+  };
+
+  // Xử lý khi chọn danh mục trong form câu hỏi
+  const handleCategoryChange = (e) => {
+    const category_id = e.target.value;
+    setQuesForm({
+      ...quesForm,
+      category_id,
+      // Reset lesson_id nếu danh mục thay đổi
+      lesson_id: category_id === quesForm.category_id ? quesForm.lesson_id : "",
+    });
+  };
+
+  // Xử lý khi chọn bài học trong form câu hỏi
+  const handleLessonChange = (e) => {
+    const lesson_id = e.target.value;
+    const lesson = lessons.find((l) => l.id == lesson_id);
+
+    setQuesForm({
+      ...quesForm,
+      lesson_id,
+      // Tự động cập nhật danh mục nếu có bài học
+      category_id: lesson ? lesson.category_id : quesForm.category_id,
+    });
   };
 
   return (
@@ -235,7 +338,6 @@ export default function Admin() {
         margin: "0 auto",
       }}
     >
-      <ToastContainer position="top-right" autoClose={3000} />
       <h1>📋 Quản trị hệ thống</h1>
       <div style={{ margin: "20px 0", display: "flex", gap: 10 }}>
         <button
@@ -595,8 +697,8 @@ export default function Admin() {
                 }
                 style={{ width: "100%", padding: 8 }}
               >
-                <option value="arithmetic">Số học</option>
-                <option value="visual">Thị giác</option>
+                <option value="số học">Số học</option>
+                <option value="thị giác">Thị giác</option>
               </select>
             </div>
 
@@ -632,7 +734,7 @@ export default function Admin() {
                       required_score: 0,
                       operation: "",
                       level: 1,
-                      type: "arithmetic",
+                      type: "số học",
                     })
                   }
                   style={{
@@ -651,14 +753,44 @@ export default function Admin() {
             </div>
           </div>
 
-          <div style={{ marginBottom: 15 }}>
-            <label style={{ fontWeight: "bold" }}>Tìm kiếm: </label>
-            <input
-              value={lesSearch}
-              onChange={(e) => setLesSearch(e.target.value)}
-              style={{ padding: 8, width: 300 }}
-              placeholder="Tìm kiếm bài học..."
-            />
+          {/* New filter section for lessons */}
+          <div
+            style={{
+              marginBottom: 15,
+              display: "flex",
+              gap: 10,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Tìm kiếm:{" "}
+              </label>
+              <input
+                value={lesSearch}
+                onChange={(e) => setLesSearch(e.target.value)}
+                style={{ padding: 8, width: 300 }}
+                placeholder="Tìm kiếm bài học..."
+              />
+            </div>{" "}
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Lọc theo danh mục:{" "}
+              </label>
+              <select
+                value={lesFilterCategory}
+                onChange={(e) => setLesFilterCategory(e.target.value)}
+                style={{ padding: 8, width: 200 }}
+              >
+                <option value="">Tất cả danh mục</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <table
@@ -800,6 +932,31 @@ export default function Admin() {
               gap: 15,
             }}
           >
+            {/* Thêm trường chọn danh mục */}
+            <div>
+              <label
+                style={{
+                  fontWeight: "bold",
+                  display: "block",
+                  marginBottom: 5,
+                }}
+              >
+                Danh mục:{" "}
+              </label>
+              <select
+                value={quesForm.category_id}
+                onChange={handleCategoryChange}
+                style={{ width: "100%", padding: 8 }}
+              >
+                <option value="">--Chọn danh mục--</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label
                 style={{
@@ -812,13 +969,11 @@ export default function Admin() {
               </label>
               <select
                 value={quesForm.lesson_id}
-                onChange={(e) =>
-                  setQuesForm({ ...quesForm, lesson_id: e.target.value })
-                }
+                onChange={handleLessonChange}
                 style={{ width: "100%", padding: 8 }}
               >
                 <option value="">--Chọn bài học--</option>
-                {lessons.map((l) => (
+                {getLessonsByCategory(quesForm.category_id).map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name} (ID: {l.id})
                   </option>
@@ -842,7 +997,7 @@ export default function Admin() {
                   setQuesForm({ ...quesForm, content: e.target.value })
                 }
                 style={{ width: "100%", padding: 8, minHeight: 80 }}
-                placeholder="Nội dumg câu hỏi..."
+                placeholder="Nội dung câu hỏi..."
               />
             </div>
 
@@ -1022,14 +1177,70 @@ export default function Admin() {
             </div>
           </div>
 
-          <div style={{ marginBottom: 15 }}>
-            <label style={{ fontWeight: "bold" }}>Tìm kiếm: </label>
-            <input
-              value={quesSearch}
-              onChange={(e) => setQuesSearch(e.target.value)}
-              style={{ padding: 8, width: 300 }}
-              placeholder="Tìm kiếm câu hỏi..."
-            />
+          {/* New filter section for questions */}
+          <div
+            style={{
+              marginBottom: 15,
+              display: "flex",
+              gap: 10,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Tìm kiếm:{" "}
+              </label>
+              <input
+                value={quesSearch}
+                onChange={(e) => setQuesSearch(e.target.value)}
+                style={{ padding: 8, width: 300 }}
+                placeholder="Tìm kiếm câu hỏi..."
+              />
+            </div>{" "}
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Lọc theo danh mục:{" "}
+              </label>
+              <select
+                value={quesFilterCategory}
+                onChange={(e) => {
+                  setQuesFilterCategory(e.target.value);
+                  setQuesFilterLesson(""); // Reset bài học khi đổi danh mục
+                }}
+                style={{ padding: 8, width: 200 }}
+              >
+                <option value="">Tất cả danh mục</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontWeight: "bold", marginRight: 5 }}>
+                Lọc theo bài học:{" "}
+              </label>
+              <select
+                value={quesFilterLesson}
+                onChange={(e) => setQuesFilterLesson(e.target.value)}
+                style={{ padding: 8, width: 250 }}
+              >
+                <option value="">Tất cả bài học</option>
+                {lessons
+                  .filter((l) =>
+                    quesFilterCategory
+                      ? l.category_id == quesFilterCategory
+                      : true
+                  )
+                  .map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.name} (ID: {l.id})
+                    </option>
+                  ))}
+              </select>
+            </div>
           </div>
 
           <table

@@ -13,7 +13,7 @@ export default function DangKy() {
     try {
       await API.post("/auth/register", { username, password });
       toast.success("🎉 Đăng ký thành công!");
-      navigate("/login"); // 👉 Chuyển hướng NGAY
+      navigate("/login");
     } catch (err) {
       toast.error("❌ Đăng ký thất bại");
     }

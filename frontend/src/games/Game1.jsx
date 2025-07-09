@@ -441,56 +441,44 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     }, 500);
   };
 
-  const getSymbol = (operation) => {
-    switch (operation) {
-      case "add":
-        return "+";
-      case "subtract":
-        return "-";
-      case "multiply":
-        return "×";
-      case "divide":
-        return "÷";
-      case "mix":
-        return "±";
-      default:
-        return "?";
-    }
-  };
+  // … trong Game1 component …
 
-  const getOperationColor = (operation) => {
-    switch (operation) {
-      case "add":
-        return "#4ade80, #3b82f6";
-      case "subtract":
-        return "#f87171, #f472b6";
-      case "multiply":
-        return "#c084fc, #6366f1";
-      case "divide":
-        return "#fb923c, #ef4444";
-      case "mix":
-        return "#2dd4bf, #22d3ee";
-      default:
-        return "#9ca3af, #6b7280";
-    }
-  };
+// 1. Hiển thị ký hiệu
+const getSymbol = (operation) => {
+  switch (operation) {
+    case "cộng":      return "+";
+    case "trừ":       return "−";
+    case "nhân":      return "×";
+    case "chia":      return "÷";
+    case "hỗn hợp":   return "±";
+    default:          return "?";
+  }
+};
 
-  const getOperationEmoji = (operation) => {
-    switch (operation) {
-      case "add":
-        return "➕";
-      case "subtract":
-        return "➖";
-      case "multiply":
-        return "✖️";
-      case "divide":
-        return "➗";
-      case "mix":
-        return "🔄";
-      default:
-        return "🎯";
-    }
-  };
+// 2. Chọn màu sắc theo phép
+const getOperationColor = (operation) => {
+  switch (operation) {
+    case "cộng":      return "#4ade80, #3b82f6";   // xanh lá → xanh dương
+    case "trừ":       return "#f87171, #f472b6";   // đỏ → hồng
+    case "nhân":      return "#c084fc, #6366f1";   // tím nhạt → tím đậm
+    case "chia":      return "#fb923c, #ef4444";   // cam nhạt → cam đậm
+    case "hỗn hợp":   return "#2dd4bf, #22d3ee";   // xanh ngọc → xanh biển
+    default:          return "#9ca3af, #6b7280";   // xám
+  }
+};
+
+// 3. Emoji minh hoạ
+const getOperationEmoji = (operation) => {
+  switch (operation) {
+    case "cộng":      return "➕";
+    case "trừ":       return "➖";
+    case "nhân":      return "✖️";
+    case "chia":      return "➗";
+    case "hỗn hợp":   return "🔄";
+    default:          return "🎯";
+  }
+};
+
 
   const getCelebrationMessage = () => {
     const percentage = Math.round((score / questions.length) * 100);

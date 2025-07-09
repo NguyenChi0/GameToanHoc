@@ -339,18 +339,17 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     </div>
   );
 }
-
 function getSymbol(operation) {
   switch (operation) {
-    case "add":
+    case "cộng":
       return "+";
-    case "subtract":
+    case "trừ":
       return "-";
-    case "multiply":
+    case "nhân":
       return "×";
-    case "divide":
+    case "chia":
       return "÷";
-    case "mix":
+    case "hỗn hợp":
       return "±";
     default:
       return "?";

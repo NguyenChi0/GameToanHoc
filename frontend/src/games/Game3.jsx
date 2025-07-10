@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +11,13 @@ const BALLOON_COLORS = [
   "#9C27B0", // Tím
   "#FF9800", // Cam
   "#E91E63", // Hồng
+];
+
+const BALLOON_IMAGES = [
+  '/images/balloon1.png',
+  '/images/balloon2.png',
+  '/images/balloon3.png',
+  '/images/balloon.png',
 ];
 
 // Tạo animation bay ngẫu nhiên
@@ -38,11 +45,14 @@ const floatUp = (startPos) => keyframes`
 const GameContainer = styled.div`
   width: 100%;
   height: 100vh;
-  background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+  background-image: url('/images/sky.png');
+  background-size: cover;
+  background-position: center;
   overflow: hidden;
   position: relative;
   font-family: 'Comic Sans MS', cursive, sans-serif;
 `;
+
 
 const Sky = styled.div`
   position: relative;
@@ -57,14 +67,31 @@ const QuestionBox = styled.div`
   transform: translateX(-50%);
   font-size: 32px;
   font-weight: bold;
-  background: rgba(255, 255, 255, 0.9);
+  background-image: url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');
+  background-size: cover;
+  background-position: center;
+  color: white;
   padding: 15px 25px;
   border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   z-index: 10;
   text-align: center;
   max-width: 80%;
   border: 3px solid #FFD700;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  
+  /* Overlay để làm nổi bật text */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    z-index: -1;
+  }
 `;
 
 const Balloon = styled.div`
@@ -72,35 +99,69 @@ const Balloon = styled.div`
   bottom: -200px;
   width: 150px;
   height: 180px;
-  background: ${props => props.color};
+  background-image: url(${props => props.bgImage});
+  background-size: cover;
+  background-position: center;
   border-radius: 50%;
   cursor: pointer;
   animation: ${props => floatUp(props.startPos)} ${props => props.duration}s linear infinite;
   animation-delay: ${props => props.delay}s;
   z-index: 5;
-  box-shadow: inset -10px -10px 15px rgba(0, 0, 0, 0.2);
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 24px;
   font-weight: bold;
   color: white;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-  
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+
   &:hover {
     transform: scale(1.15) !important;
-    box-shadow: inset -15px -15px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
   }
-  
-  /* Tạo hiệu ứng bóng bay thật hơn */
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -15px;
-    width: 30px;
-    height: 40px;
-    background: ${props => props.color};
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+`;
+
+
+const BackButton = styled.button`
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+
+  &:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+  }
+`;
+
+const PlayAgainButton = styled.button`
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s;
+
+  &:hover {
+    background-color: #1976D2;
+    transform: translateX(-50%) scale(1.05);
   }
 `;
 
@@ -129,13 +190,46 @@ const ScoreDisplay = styled.div`
   position: absolute;
   top: 20px;
   right: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  background-image: url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');
+  background-size: cover;
+  background-position: center;
+  color: white;
   padding: 10px 15px;
   border-radius: 10px;
   font-size: 18px;
   font-weight: bold;
   z-index: 20;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  
+  /* Overlay để nổi bật text */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    z-index: -1;
+  }
+`;
+
+const FeedbackMessage = styled.div`
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: ${props => (props.isCorrect ? '#4CAF50' : '#FF5252')};
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 15;
+  opacity: ${props => (props.show ? 1 : 0)};
+  transition: opacity 0.5s ease;
 `;
 
 export default function Game3({ lessonId }) {
@@ -144,8 +238,12 @@ export default function Game3({ lessonId }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
+  const [feedback, setFeedback] = useState({ message: '', isCorrect: false, show: false });
   const navigate = useNavigate();
-  const username = localStorage.getItem('username'); // Giả sử username được lưu trong localStorage
+  const username = localStorage.getItem('username');
+  
+  // Sử dụng useRef để theo dõi điểm thực tế (không bị ảnh hưởng bởi React state batching)
+  const actualScore = useRef(0);
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
@@ -158,8 +256,7 @@ export default function Game3({ lessonId }) {
   }, [lessonId]);
 
   const saveScore = async (additionalScore) => {
-    console.log(`Đang lưu điểm: ${score}`);
-
+    console.log(`Đang lưu điểm: ${additionalScore}`);
     try {
       const response = await fetch('http://localhost:5000/api/score/save', {
         method: 'POST',
@@ -169,10 +266,9 @@ export default function Game3({ lessonId }) {
         body: JSON.stringify({
           username: username,
           score: additionalScore,
-          action: 'add' // Thêm điểm vào điểm hiện có
+          action: 'add'
         }),
       });
-
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || 'Lỗi khi lưu điểm');
@@ -182,55 +278,100 @@ export default function Game3({ lessonId }) {
       console.error('Lỗi khi lưu điểm:', error);
       return null;
     }
-    
   };
 
   const handleAnswer = (answer) => {
-  if (answer === question.correct_answer) {
+    const question = questions[currentIndex];
     const pointsEarned = 10;
-    setScore(prev => prev + pointsEarned); // ✅ Sửa lại
-    alert(`🎯 Chính xác! Bạn được +${pointsEarned} điểm`);
-  } else {
-    alert(`💥 Sai rồi! Đáp án đúng là: ${question.correct_answer}`);
-  }
+    
+    if (answer === question.correct_answer) {
+      // Cập nhật cả state (để hiển thị) và ref (để tính toán chính xác)
+      setScore(prev => prev + pointsEarned);
+      actualScore.current += pointsEarned;
+      
+      console.log(`✅ Đáp án đúng! Điểm tạm thời: ${actualScore.current}`);
+      setFeedback({ message: `Chính xác! +${pointsEarned} điểm`, isCorrect: true, show: true });
+    } else {
+      console.log(`❌ Đáp án sai!`);
+      setFeedback({ message: `Sai rồi! Đáp án đúng là: ${question.correct_answer}`, isCorrect: false, show: true });
+    }
 
-  if (currentIndex < questions.length - 1) {
-    setCurrentIndex(currentIndex + 1);
-  } else {
-    completeGame();
-  }
-};
-
+    setTimeout(() => {
+      setFeedback(prev => ({ ...prev, show: false }));
+      if (currentIndex < questions.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        completeGame();
+      }
+    }, 2000);
+  };
 
   const completeGame = async () => {
-  setGameCompleted(true);
-  const bonusPoints = 50;
+    setGameCompleted(true);
+    const totalScore = actualScore.current;
 
-  console.log("📊 Tổng điểm trước thưởng:", score);
-  console.log("🎁 Điểm thưởng:", bonusPoints);
+    console.log("🎯 === HOÀN THÀNH GAME ===");
+    console.log("📊 Điểm từ câu hỏi:", actualScore.current);
+    console.log("🏆 Tổng điểm cuối:", totalScore);
 
-  if (score > 0) {
-    await saveScore(score);
-  }
+    // Lưu điểm từ câu hỏi nếu có
+    if (actualScore.current > 0) {
+      console.log("💾 Lưu điểm từ câu hỏi...");
+      await saveScore(actualScore.current);
+    }
 
-  await saveScore(bonusPoints);
+    setFeedback({ message: `🎉 Hoàn thành! Tổng điểm: ${totalScore}`, isCorrect: true, show: true });
+    // Không tự động chuyển trang nữa, để người dùng chọn
+  };
 
-  alert(`🎉 Bạn đã hoàn thành bài học! Tổng điểm: ${score + bonusPoints}`);
-  navigate('/lessons');
-};
+  const goToHome = () => {
+    navigate('..');
+  };
 
+  const playAgain = () => {
+    // Reset game state
+    setCurrentIndex(0);
+    setScore(0);
+    actualScore.current = 0;
+    setGameCompleted(false);
+    setFeedback({ message: '', isCorrect: false, show: false });
+    
+    console.log("🔄 Chơi lại game!");
+  };
 
   const endGame = async () => {
     if (window.confirm("Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại.")) {
-      await saveScore(score);
+      console.log("🛑 === DỪNG GAME ===");
+      console.log("📊 Điểm hiện tại:", actualScore.current);
+      
+      // Chỉ lưu điểm nếu có điểm
+      if (actualScore.current > 0) {
+        console.log("💾 Lưu điểm hiện tại...");
+        await saveScore(actualScore.current);
+      }
       navigate('..');
     }
   };
 
   if (!lessonInfo || questions.length === 0) return <p>Đang tải câu hỏi...</p>;
 
+  if (gameCompleted) {
+    return (
+      <GameContainer>
+        <Sky>
+          <ScoreDisplay>Điểm: {actualScore.current}</ScoreDisplay>
+          <FeedbackMessage show={feedback.show} isCorrect={feedback.isCorrect}>
+            {feedback.message}
+          </FeedbackMessage>
+          <BackButton onClick={goToHome}>🏠 Về trang chủ</BackButton>
+          <PlayAgainButton onClick={playAgain}>🔄 Chơi lại</PlayAgainButton>
+        </Sky>
+      </GameContainer>
+    );
+  }
+
   const question = questions[currentIndex];
-  const options = [...question.options].sort(() => Math.random() - 0.5); // Xáo trộn đáp án
+  const options = [...question.options].sort(() => Math.random() - 0.5);
 
   return (
     <GameContainer>
@@ -238,26 +379,32 @@ export default function Game3({ lessonId }) {
         <ScoreDisplay>Điểm: {score}</ScoreDisplay>
         <QuestionBox>{question.content}</QuestionBox>
         <EndGameButton onClick={endGame}>Kết thúc game</EndGameButton>
-
+        <FeedbackMessage show={feedback.show} isCorrect={feedback.isCorrect}>
+          {feedback.message}
+        </FeedbackMessage>
         {options.map((option, index) => {
-          const startPos = Math.random() * 70 + 15; // 15-85%
-          const duration = Math.random() * 6 + 6; // 6-12 giây
-          const delay = Math.random() * 4; // 0-4 giây delay
-          const color = BALLOON_COLORS[index % BALLOON_COLORS.length];
-          
-          return (
-            <Balloon
-              key={index}
-              color={color}
-              startPos={startPos}
-              duration={duration}
-              delay={delay}
-              onClick={() => handleAnswer(option)}
-            >
-              {option}
-            </Balloon>
-          );
-        })}
+  const startPos = Math.random() * 70 + 15;
+  const duration = Math.random() * 6 + 6;
+  const delay = Math.random() * 4;
+  const color = BALLOON_COLORS[index % BALLOON_COLORS.length];
+  const randomImage = BALLOON_IMAGES[Math.floor(Math.random() * BALLOON_IMAGES.length)];
+
+  return (
+    <Balloon
+      key={index}
+      color={color}
+      bgImage={randomImage} // THÊM DÒNG NÀY
+      startPos={startPos}
+      duration={duration}
+      delay={delay}
+      onClick={() => handleAnswer(option)}
+    >
+      {option}
+    </Balloon>
+  );
+})}
+
+
       </Sky>
     </GameContainer>
   );

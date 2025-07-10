@@ -1,6 +1,60 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
+
+// Keyframes for animations
+const confettiAnimation = keyframes`
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+`;
+
+const bounceAnimation = keyframes`
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+`;
+
+const sparkleAnimation = keyframes`
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(360deg);
+  }
+`;
+
+const pulseAnimation = keyframes`
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+`;
 
 // Styled components
 const Container = styled.div`
@@ -101,11 +155,13 @@ const Feedback = styled.div`
 
 const CompletedContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(to bottom right, #ecfdf5, #e0f2fe);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  position: relative;
+  overflow: hidden;
 `;
 
 const CompletedCard = styled.div`
@@ -113,9 +169,55 @@ const CompletedCard = styled.div`
   width: 100%;
   background: white;
   border-radius: 24px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   padding: 32px;
   text-align: center;
+  position: relative;
+  z-index: 10;
+  animation: ${bounceAnimation} 1s ease-out;
+`;
+
+const CelebrationTitle = styled.h2`
+  font-size: 30px;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 8px;
+  animation: ${pulseAnimation} 2s infinite;
+`;
+
+const TrophyIcon = styled.div`
+  font-size: 80px;
+  margin-bottom: 16px;
+  animation: ${bounceAnimation} 2s infinite;
+`;
+
+const ScoreDisplay = styled.div`
+  background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+`;
+
+const Sparkle = styled.div`
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, #fff, transparent);
+  border-radius: 50%;
+  animation: ${sparkleAnimation} 2s infinite;
+  animation-delay: ${props => props.delay || '0s'};
+`;
+
+const Confetti = styled.div`
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: ${props => props.color};
+  animation: ${confettiAnimation} 3s linear infinite;
+  animation-delay: ${props => props.delay || '0s'};
+  left: ${props => props.left || '50%'};
 `;
 
 const RetryButton = styled.button`
@@ -154,6 +256,16 @@ const EndGameButton = styled.button`
   }
 `;
 
+const CelebrationBackground = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+`;
+
 export default function Game1({ lessonId, lessonName, operation, level }) {
   const [questions, setQuestions] = useState([]);
   const [lessonInfo, setLessonInfo] = useState(null);
@@ -165,7 +277,11 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
   const [feedback, setFeedback] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
+<<<<<<< HEAD
+  const username = localStorage.getItem('username');
+=======
   const username = localStorage.getItem("username"); // Giả sử username được lưu trong localStorage
+>>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
 
   const saveScore = async (additionalScore) => {
     console.log(`Đang lưu điểm: ${additionalScore}`);
@@ -179,7 +295,11 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
         body: JSON.stringify({
           username: username,
           score: additionalScore,
+<<<<<<< HEAD
+          action: 'add'
+=======
           action: "add", // Thêm điểm vào điểm hiện có
+>>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
         }),
       });
 
@@ -195,12 +315,17 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
   };
 
   const endGame = async () => {
+<<<<<<< HEAD
+    if (window.confirm("Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại.")) {
+      const finalScore = score * 10;
+=======
     if (
       window.confirm(
         "Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại."
       )
     ) {
       const finalScore = score * 10; // Giả sử mỗi câu đúng được 10 điểm
+>>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
       await saveScore(finalScore);
       navigate("..");
     }
@@ -208,21 +333,31 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
 
   const completeGame = async () => {
     setIsCompleted(true);
-    const finalScore = score * 10; // Mỗi câu đúng = 10 điểm
-    const bonusPoints = 50; // Điểm thưởng hoàn thành
+    const finalScore = score * 10; // Chỉ tính điểm từ câu trả lời đúng
 
     console.log("📊 Tổng điểm:", finalScore);
-    console.log("🎁 Điểm thưởng:", bonusPoints);
 
     if (finalScore > 0) {
       await saveScore(finalScore);
     }
 
-    await saveScore(bonusPoints);
+    // Bỏ alert, để celebration tự nói lên tất cả
+  };
 
+<<<<<<< HEAD
+  const resetGame = () => {
+    setCurrentIndex(0);
+    setScore(0);
+    setSelectedAnswer(null);
+    setShowResult(false);
+    setIsCompleted(false);
+    setFeedback("");
+    setIsAnimating(false);
+=======
     alert(
       `🎉 Bạn đã hoàn thành bài học! Tổng điểm: ${finalScore + bonusPoints}`
     );
+>>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
   };
 
   useEffect(() => {
@@ -234,6 +369,25 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
       })
       .catch((err) => console.error("Lỗi khi lấy câu hỏi:", err));
   }, [lessonId]);
+
+  // Create confetti pieces
+  const createConfetti = () => {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7'];
+    const confettiPieces = [];
+    
+    for (let i = 0; i < 50; i++) {
+      confettiPieces.push(
+        <Confetti
+          key={i}
+          color={colors[Math.floor(Math.random() * colors.length)]}
+          left={`${Math.random() * 100}%`}
+          delay={`${Math.random() * 3}s`}
+        />
+      );
+    }
+    
+    return confettiPieces;
+  };
 
   if (!lessonInfo || questions.length === 0) {
     return (
@@ -293,61 +447,82 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     }, 500);
   };
 
-  const getSymbol = (operation) => {
-    switch (operation) {
-      case "add":
-        return "+";
-      case "subtract":
-        return "-";
-      case "multiply":
-        return "×";
-      case "divide":
-        return "÷";
-      case "mix":
-        return "±";
-      default:
-        return "?";
-    }
-  };
+  // … trong Game1 component …
 
-  const getOperationColor = (operation) => {
-    switch (operation) {
-      case "add":
-        return "#4ade80, #3b82f6";
-      case "subtract":
-        return "#f87171, #f472b6";
-      case "multiply":
-        return "#c084fc, #6366f1";
-      case "divide":
-        return "#fb923c, #ef4444";
-      case "mix":
-        return "#2dd4bf, #22d3ee";
-      default:
-        return "#9ca3af, #6b7280";
-    }
-  };
+// 1. Hiển thị ký hiệu
+const getSymbol = (operation) => {
+  switch (operation) {
+    case "cộng":      return "+";
+    case "trừ":       return "−";
+    case "nhân":      return "×";
+    case "chia":      return "÷";
+    case "hỗn hợp":   return "±";
+    default:          return "?";
+  }
+};
 
-  const getOperationEmoji = (operation) => {
-    switch (operation) {
-      case "add":
-        return "➕";
-      case "subtract":
-        return "➖";
-      case "multiply":
-        return "✖️";
-      case "divide":
-        return "➗";
-      case "mix":
-        return "🔄";
-      default:
-        return "🎯";
-    }
+// 2. Chọn màu sắc theo phép
+const getOperationColor = (operation) => {
+  switch (operation) {
+    case "cộng":      return "#4ade80, #3b82f6";   // xanh lá → xanh dương
+    case "trừ":       return "#f87171, #f472b6";   // đỏ → hồng
+    case "nhân":      return "#c084fc, #6366f1";   // tím nhạt → tím đậm
+    case "chia":      return "#fb923c, #ef4444";   // cam nhạt → cam đậm
+    case "hỗn hợp":   return "#2dd4bf, #22d3ee";   // xanh ngọc → xanh biển
+    default:          return "#9ca3af, #6b7280";   // xám
+  }
+};
+
+// 3. Emoji minh hoạ
+const getOperationEmoji = (operation) => {
+  switch (operation) {
+    case "cộng":      return "➕";
+    case "trừ":       return "➖";
+    case "nhân":      return "✖️";
+    case "chia":      return "➗";
+    case "hỗn hợp":   return "🔄";
+    default:          return "🎯";
+  }
+};
+
+
+  const getCelebrationMessage = () => {
+    const percentage = Math.round((score / questions.length) * 100);
+    if (percentage === 100) return "🌟 HOÀN HẢO! Bạn là thiên tài!";
+    if (percentage >= 90) return "🎊 XUẤT SẮC! Thật tuyệt vời!";
+    if (percentage >= 80) return "🎉 TỐT LẮM! Bạn đã làm rất tốt!";
+    if (percentage >= 70) return "👏 KHÁ TỐT! Tiếp tục cố gắng!";
+    if (percentage >= 60) return "👍 ĐƯỢC RỒI! Bạn đã cố gắng!";
+    return "💪 CỐ GẮNG HỌC THÊM! Bạn sẽ giỏi hơn!";
   };
 
   if (isCompleted) {
     return (
       <CompletedContainer>
+        <CelebrationBackground>
+          {createConfetti()}
+        </CelebrationBackground>
+        
         <CompletedCard>
+<<<<<<< HEAD
+          <TrophyIcon>🏆</TrophyIcon>
+          <CelebrationTitle>
+            CHÚC MỪNG!
+          </CelebrationTitle>
+          <p style={{ color: "#4b5563", fontSize: "18px", marginBottom: "24px" }}>
+            {getCelebrationMessage()}
+          </p>
+
+          <ScoreDisplay>
+            <Sparkle delay="0s" style={{ top: '10px', left: '10px' }} />
+            <Sparkle delay="0.5s" style={{ top: '20px', right: '20px' }} />
+            <Sparkle delay="1s" style={{ bottom: '10px', left: '30px' }} />
+            <Sparkle delay="1.5s" style={{ bottom: '20px', right: '10px' }} />
+            
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+              <span style={{ fontSize: "48px", marginRight: "12px" }}>⭐</span>
+              <span style={{ fontSize: "36px", fontWeight: "bold", color: "#1f2937" }}>
+=======
           <div style={{ marginBottom: "24px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏆</div>
             <h2
@@ -387,25 +562,33 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
                   color: "#1f2937",
                 }}
               >
+>>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
                 {score}/{questions.length}
               </span>
             </div>
-            <div style={{ fontSize: "14px", color: "#4b5563" }}>
+            
+            <div style={{ fontSize: "16px", color: "#4b5563", marginBottom: "8px" }}>
               Tỉ lệ chính xác: {Math.round((score / questions.length) * 100)}%
             </div>
-            <div style={{ marginTop: "8px", fontSize: "18px" }}>
-              {score === questions.length
-                ? "🌟 Xuất sắc!"
-                : score >= questions.length * 0.8
-                ? "👍 Tốt lắm!"
-                : score >= questions.length * 0.6
-                ? "👌 Khá tốt!"
-                : "💪 Cố gắng hơn!"}
+            
+            <div style={{ fontSize: "20px", fontWeight: "bold", color: "#d63031" }}>
+              Điểm số: {score * 10} điểm
             </div>
+          </ScoreDisplay>
+
+          <div style={{ marginBottom: "24px" }}>
+            <div style={{ fontSize: "48px", marginBottom: "8px" }}>
+              {score === questions.length ? "🎊🎉🎊" : 
+               score >= questions.length * 0.8 ? "🎉🎈🎉" : 
+               score >= questions.length * 0.6 ? "🎈👏🎈" : "💪🌟💪"}
+            </div>
+            <p style={{ fontSize: "16px", color: "#6b7280" }}>
+              Bạn đã hoàn thành bài học "{lessonInfo.lesson_name}"
+            </p>
           </div>
 
-          <RetryButton onClick={() => window.location.reload()}>
-            🔄 Làm lại
+          <RetryButton onClick={resetGame}>
+            🔄 Làm lại để đạt điểm cao hơn
           </RetryButton>
         </CompletedCard>
       </CompletedContainer>

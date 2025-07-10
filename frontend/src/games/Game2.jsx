@@ -73,19 +73,19 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
 
   useEffect(() => {
     const loadImages = () => {
-      const images = {
-        apple: new Image(),
-        basket: new Image(),
-        background: new Image(),
-      };
-      images.apple.crossOrigin = "anonymous";
-      images.apple.src = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f34e.png";
-      images.basket.crossOrigin = "anonymous";
-      images.basket.src = "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f9fa.png";
-      images.background.crossOrigin = "anonymous";
-      images.background.src = "https://images.unsplash.com/photo-1560707303-4e980ce876ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600&q=80";
-      imagesRef.current = images;
-    };
+  const images = {
+    apple: new Image(),
+    basket: new Image(),
+    background: new Image(),
+  };
+
+  images.apple.src = "/images/apple.png";
+  images.basket.src = "/images/socket.png";
+  images.background.src = "/images/background.png";
+
+  imagesRef.current = images;
+};
+
     loadImages();
   }, []);
 
@@ -339,18 +339,17 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     </div>
   );
 }
-
 function getSymbol(operation) {
   switch (operation) {
-    case "add":
+    case "cộng":
       return "+";
-    case "subtract":
+    case "trừ":
       return "-";
-    case "multiply":
+    case "nhân":
       return "×";
-    case "divide":
+    case "chia":
       return "÷";
-    case "mix":
+    case "hỗn hợp":
       return "±";
     default:
       return "?";

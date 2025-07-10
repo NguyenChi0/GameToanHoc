@@ -13,6 +13,13 @@ const BALLOON_COLORS = [
   "#E91E63", // Hồng
 ];
 
+const BALLOON_IMAGES = [
+  '/images/balloon1.png',
+  '/images/balloon2.png',
+  '/images/balloon3.png',
+  '/images/balloon.png',
+];
+
 // Tạo animation bay ngẫu nhiên
 const floatUp = (startPos) => keyframes`
   0% {
@@ -38,13 +45,14 @@ const floatUp = (startPos) => keyframes`
 const GameContainer = styled.div`
   width: 100%;
   height: 100vh;
-  background-image: url('https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+  background-image: url('/images/sky.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
   position: relative;
   font-family: 'Comic Sans MS', cursive, sans-serif;
 `;
+
 
 const Sky = styled.div`
   position: relative;
@@ -91,7 +99,7 @@ const Balloon = styled.div`
   bottom: -200px;
   width: 150px;
   height: 180px;
-  background-image: url('https://images.unsplash.com/photo-1530103862676-de8c9debad1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');
+  background-image: url(${props => props.bgImage});
   background-size: cover;
   background-position: center;
   border-radius: 50%;
@@ -99,7 +107,6 @@ const Balloon = styled.div`
   animation: ${props => floatUp(props.startPos)} ${props => props.duration}s linear infinite;
   animation-delay: ${props => props.delay}s;
   z-index: 5;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -107,26 +114,13 @@ const Balloon = styled.div`
   font-weight: bold;
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-  
-  /* Overlay để tạo màu cho từng bóng */
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: ${props => props.color};
-    opacity: 0.7;
-    border-radius: 50%;
-    z-index: -1;
-  }
-  
+
   &:hover {
     transform: scale(1.15) !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
   }
 `;
+
 
 const BackButton = styled.button`
   position: absolute;
@@ -389,24 +383,28 @@ export default function Game3({ lessonId }) {
           {feedback.message}
         </FeedbackMessage>
         {options.map((option, index) => {
-          const startPos = Math.random() * 70 + 15;
-          const duration = Math.random() * 6 + 6;
-          const delay = Math.random() * 4;
-          const color = BALLOON_COLORS[index % BALLOON_COLORS.length];
-          
-          return (
-            <Balloon
-              key={index}
-              color={color}
-              startPos={startPos}
-              duration={duration}
-              delay={delay}
-              onClick={() => handleAnswer(option)}
-            >
-              {option}
-            </Balloon>
-          );
-        })}
+  const startPos = Math.random() * 70 + 15;
+  const duration = Math.random() * 6 + 6;
+  const delay = Math.random() * 4;
+  const color = BALLOON_COLORS[index % BALLOON_COLORS.length];
+  const randomImage = BALLOON_IMAGES[Math.floor(Math.random() * BALLOON_IMAGES.length)];
+
+  return (
+    <Balloon
+      key={index}
+      color={color}
+      bgImage={randomImage} // THÊM DÒNG NÀY
+      startPos={startPos}
+      duration={duration}
+      delay={delay}
+      onClick={() => handleAnswer(option)}
+    >
+      {option}
+    </Balloon>
+  );
+})}
+
+
       </Sky>
     </GameContainer>
   );

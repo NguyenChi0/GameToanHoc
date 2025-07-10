@@ -1,9 +1,9 @@
-// backend/routes/categories.js
+// backend/routes/categories.js- Xử lý các API liên quan đến danh mục (category)
 const express = require("express");
 const router = express.Router();
 const conn = require("../db");
 
-// Lấy danh sách categories
+// Lấy danh sách tất cả categories
 router.get("/", (req, res) => {
   conn.query("SELECT * FROM categories", (err, results) => {
     if (err) return res.status(500).json({ message: "Lỗi server" });
@@ -11,7 +11,7 @@ router.get("/", (req, res) => {
   });
 });
 
-// Thêm category mới
+// Thêm 1 category mới
 router.post("/", (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).json({ message: "Thiếu tên category" });
@@ -27,7 +27,7 @@ router.post("/", (req, res) => {
   );
 });
 
-//Cập nhật category
+//Cập nhật category theo ID
 router.put("/:id", (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
@@ -44,7 +44,7 @@ router.put("/:id", (req, res) => {
   );
 });
 
-// Xoá category
+// Xoá category theo ID
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
   conn.query("DELETE FROM categories WHERE id = ?", [id], (err, result) => {

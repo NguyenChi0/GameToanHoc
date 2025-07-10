@@ -48,7 +48,6 @@ router.post("/", (req, res) => {
     INSERT INTO lessons (category_id, name, required_score, operation, level, type)
     VALUES (?, ?, ?, ?, ?, ?)
   `;
-
   conn.query(
     sql,
     [
@@ -71,7 +70,6 @@ router.put("/:id", (req, res) => {
   const { id } = req.params;
   const { category_id, name, required_score, operation, level, type } =
     req.body;
-
   const sql = `
     UPDATE lessons SET 
       category_id=?, 
@@ -82,7 +80,6 @@ router.put("/:id", (req, res) => {
       type=?
     WHERE id=?
   `;
-
   conn.query(
     sql,
     [category_id, name, required_score, operation, level, type, id],

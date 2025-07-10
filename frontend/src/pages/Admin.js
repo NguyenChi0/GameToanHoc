@@ -3,9 +3,10 @@ import API from "../api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// Số lượng item hiển thị trên mỗi trang
 const PAGE_SIZE = 5;
 
-// Hàm loại bỏ dấu để hỗ trợ tìm kiếm gần đúng
+// Hàm loại bỏ dấu để hỗ trợ tìm kiếm không phân biệt dấu
 const removeAccents = (str) => {
   return str
     .normalize("NFD")
@@ -16,17 +17,19 @@ const removeAccents = (str) => {
 };
 
 export default function Admin() {
+  // State quản lý tab hiện tại (categories, lessons, questions)
   const [tab, setTab] = useState("categories");
 
-  // State for Categories
-  const [categories, setCategories] = useState([]);
-  const [catForm, setCatForm] = useState({ id: null, name: "" });
-  const [catPage, setCatPage] = useState(1);
-  const [catSearch, setCatSearch] = useState("");
+  // ===== STATE CHO PHẦN DANH MỤC =====
+  const [categories, setCategories] = useState([]); // Danh sách danh mục
+  const [catForm, setCatForm] = useState({ id: null, name: "" }); // Form thêm/sửa danh mục
+  const [catPage, setCatPage] = useState(1); // Trang hiện tại
+  const [catSearch, setCatSearch] = useState(""); // Từ khóa tìm kiếm
 
-  // State for Lessons
-  const [lessons, setLessons] = useState([]);
+  // ===== STATE CHO PHẦN BÀI HỌC =====
+  const [lessons, setLessons] = useState([]); // Danh sách bài học
   const [lesForm, setLesForm] = useState({
+    // Form thêm/sửa bài học
     id: null,
     category_id: "",
     name: "",
@@ -35,33 +38,38 @@ export default function Admin() {
     level: 1,
     type: "số học",
   });
-  const [lesPage, setLesPage] = useState(1);
-  const [lesSearch, setLesSearch] = useState("");
-  const [lesFilterCategory, setLesFilterCategory] = useState("");
+  const [lesPage, setLesPage] = useState(1); // Trang hiện tại
+  const [lesSearch, setLesSearch] = useState(""); // Từ khóa tìm kiếm
+  const [lesFilterCategory, setLesFilterCategory] = useState(""); // Bộ lọc theo danh mục
 
-  // State for Questions
-  const [questions, setQuestions] = useState([]);
+  // ===== STATE CHO PHẦN CÂU HỎI =====
+  const [questions, setQuestions] = useState([]); // Danh sách câu hỏi
   const [quesForm, setQuesForm] = useState({
+    // Form thêm/sửa câu hỏi
     id: null,
     lesson_id: "",
     content: "",
-    options: ["", "", "", ""],
+    options: ["", "", "", ""], // 4 lựa chọn
     correct_answer: "",
     question_type: "text",
     answer_type: "text",
     image_url: "",
+    category_id: "", // Danh mục (dùng để lọc bài học)
   });
-  const [quesPage, setQuesPage] = useState(1);
-  const [quesSearch, setQuesSearch] = useState("");
-  const [quesFilterCategory, setQuesFilterCategory] = useState("");
-  const [quesFilterLesson, setQuesFilterLesson] = useState("");
+  const [quesPage, setQuesPage] = useState(1); // Trang hiện tại
+  const [quesSearch, setQuesSearch] = useState(""); // Từ khóa tìm kiếm
+  const [quesFilterCategory, setQuesFilterCategory] = useState(""); // Bộ lọc theo danh mục
+  const [quesFilterLesson, setQuesFilterLesson] = useState(""); // Bộ lọc theo bài học
 
+  // Load dữ liệu khi component được mount
   useEffect(() => {
     loadData();
   }, []);
 
+  // Hàm load dữ liệu từ API
   const loadData = async () => {
     try {
+      // Gọi đồng thời 3 API để lấy dữ liệu
       const [cRes, lRes, qRes] = await Promise.all([
         API.get("/categories"),
         API.get("/lessons?category_id=all"),
@@ -75,12 +83,15 @@ export default function Admin() {
     }
   };
 
+  // Hàm phân trang dữ liệu
   const paginate = (items, page) => {
     const start = (page - 1) * PAGE_SIZE;
     return items.slice(start, start + PAGE_SIZE);
   };
 
-  // Category CRUD
+  // ===== CRUD CHO DANH MỤC =====
+
+  // Xử lý submit form danh mục (thêm/cập nhật)
   const onCatSubmit = async () => {
     if (!catForm.name.trim())
       return toast.warning("Tên danh mục không được trống", {
@@ -88,12 +99,15 @@ export default function Admin() {
       });
     try {
       if (catForm.id) {
+        // Cập nhật danh mục
         await API.put(`/categories/${catForm.id}`, { name: catForm.name });
         toast.success("Cập nhật danh mục thành công!", { autoClose: 3000 });
       } else {
+        // Thêm mới danh mục
         await API.post("/categories", { name: catForm.name });
         toast.success("Thêm danh mục mới thành công!", { autoClose: 3000 });
       }
+      // Reset form và load lại dữ liệu
       setCatForm({ id: null, name: "" });
       loadData();
     } catch (err) {
@@ -101,15 +115,17 @@ export default function Admin() {
     }
   };
 
+  // Đổ dữ liệu vào form khi sửa danh mục
   const onCatEdit = (c) => setCatForm({ id: c.id, name: c.name });
 
+  // Xóa danh mục
   const onCatDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return;
     try {
       await API.delete(`/categories/${id}`);
       toast.success("Xóa danh mục thành công!", { autoClose: 3000 });
 
-      // Reset form if deleting the currently edited category
+      // Reset form nếu đang xóa danh mục đang được chỉnh sửa
       if (catForm.id === id) {
         setCatForm({ id: null, name: "" });
       }
@@ -120,7 +136,9 @@ export default function Admin() {
     }
   };
 
-  // Lesson CRUD
+  // ===== CRUD CHO BÀI HỌC =====
+
+  // Xử lý submit form bài học (thêm/cập nhật)
   const onLesSubmit = async () => {
     if (!lesForm.name || !lesForm.category_id)
       return toast.warning("Vui lòng điền đầy đủ thông tin bài học", {
@@ -129,12 +147,15 @@ export default function Admin() {
 
     try {
       if (lesForm.id) {
+        // Cập nhật bài học
         await API.put(`/lessons/${lesForm.id}`, lesForm);
         toast.success("Cập nhật bài học thành công!", { autoClose: 3000 });
       } else {
+        // Thêm mới bài học
         await API.post("/lessons", lesForm);
         toast.success("Thêm bài học mới thành công!", { autoClose: 3000 });
       }
+      // Reset form và load lại dữ liệu
       setLesForm({
         id: null,
         category_id: "",
@@ -150,15 +171,17 @@ export default function Admin() {
     }
   };
 
+  // Đổ dữ liệu vào form khi sửa bài học
   const onLesEdit = (l) => setLesForm({ ...l });
 
+  // Xóa bài học
   const onLesDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa bài học này?")) return;
     try {
       await API.delete(`/lessons/${id}`);
       toast.success("Xóa bài học thành công!", { autoClose: 3000 });
 
-      // Reset form if deleting the currently edited lesson
+      // Reset form nếu đang xóa bài học đang được chỉnh sửa
       if (lesForm.id === id) {
         setLesForm({
           id: null,
@@ -177,13 +200,16 @@ export default function Admin() {
     }
   };
 
-  // Question CRUD
+  // ===== CRUD CHO CÂU HỎI =====
+
+  // Xử lý submit form câu hỏi (thêm/cập nhật)
   const onQuesSubmit = async () => {
     if (!quesForm.lesson_id || !quesForm.content.trim())
       return toast.warning("Vui lòng điền đầy đủ thông tin câu hỏi", {
         autoClose: 3000,
       });
 
+    // Kiểm tra các lựa chọn không được để trống
     const hasEmptyOption = quesForm.options.some((opt) => !opt.trim());
     if (hasEmptyOption)
       return toast.warning("Các lựa chọn không được để trống", {
@@ -191,19 +217,23 @@ export default function Admin() {
       });
 
     try {
+      // Chuẩn bị dữ liệu để gửi lên server
       const payload = {
         ...quesForm,
-        options: JSON.stringify(quesForm.options),
+        options: JSON.stringify(quesForm.options), // Chuyển mảng options thành chuỗi JSON
       };
 
       if (quesForm.id) {
+        // Cập nhật câu hỏi
         await API.put(`/questions/${quesForm.id}`, payload);
         toast.success("Cập nhật câu hỏi thành công!", { autoClose: 3000 });
       } else {
+        // Thêm mới câu hỏi
         await API.post("/questions", payload);
         toast.success("Thêm câu hỏi thành công!", { autoClose: 3000 });
       }
 
+      // Reset form và load lại dữ liệu
       setQuesForm({
         id: null,
         lesson_id: "",
@@ -213,6 +243,7 @@ export default function Admin() {
         question_type: "text",
         answer_type: "text",
         image_url: "",
+        category_id: "", // Reset cả danh mục
       });
       loadData();
     } catch (err) {
@@ -220,36 +251,43 @@ export default function Admin() {
     }
   };
 
+  // Đổ dữ liệu vào form khi sửa câu hỏi
   const onQuesEdit = (q) => {
     let options = [];
     try {
+      // Cố gắng parse options từ chuỗi JSON
       options = JSON.parse(q.options);
       if (!Array.isArray(options)) {
+        // Nếu không phải mảng, tách bằng dấu phẩy
         options = String(q.options)
           .split(",")
           .map((s) => s.trim());
       }
     } catch (e) {
+      // Nếu có lỗi, tách bằng dấu phẩy
       options = String(q.options)
         .split(",")
         .map((s) => s.trim());
     }
+    // Đảm bảo có đủ 4 lựa chọn
     while (options.length < 4) options.push("");
 
     // Tìm bài học tương ứng để thiết lập danh mục
     const lesson = lessons.find((l) => l.id === q.lesson_id);
     const category_id = lesson ? lesson.category_id : "";
 
+    // Set state cho form câu hỏi
     setQuesForm({ ...q, options, category_id });
   };
 
+  // Xóa câu hỏi
   const onQuesDelete = async (id) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này?")) return;
     try {
       await API.delete(`/questions/${id}`);
       toast.success("Xóa câu hỏi thành công!", { autoClose: 3000 });
 
-      // Reset form if deleting the currently edited question
+      // Reset form nếu đang xóa câu hỏi đang được chỉnh sửa
       if (quesForm.id === id) {
         setQuesForm({
           id: null,
@@ -260,6 +298,7 @@ export default function Admin() {
           question_type: "text",
           answer_type: "text",
           image_url: "",
+          category_id: "", // Reset cả danh mục
         });
       }
 
@@ -269,17 +308,21 @@ export default function Admin() {
     }
   };
 
-  // Filtered data with accent-insensitive search
+  // ===== LỌC VÀ TÌM KIẾM DỮ LIỆU =====
+
+  // Lọc danh mục với tìm kiếm không dấu
   const filteredCats = categories.filter((c) =>
     removeAccents(c.name).includes(removeAccents(catSearch))
   );
 
+  // Lọc bài học: theo tên và danh mục
   const filteredLes = lessons
     .filter((l) => removeAccents(l.name).includes(removeAccents(lesSearch)))
     .filter((l) =>
       lesFilterCategory ? l.category_id == lesFilterCategory : true
     );
 
+  // Lọc câu hỏi: theo nội dung, bài học hoặc danh mục
   const filteredQues = questions
     .filter((q) => removeAccents(q.content).includes(removeAccents(quesSearch)))
     .filter((q) => {
@@ -291,10 +334,12 @@ export default function Admin() {
       return true;
     });
 
+  // Dữ liệu phân trang
   const pagedCats = paginate(filteredCats, catPage);
   const pagedLes = paginate(filteredLes, lesPage);
   const pagedQues = paginate(filteredQues, quesPage);
 
+  // Lấy tên bài học từ ID
   const getLessonName = (lessonId) => {
     const lesson = lessons.find((l) => l.id === lessonId);
     return lesson ? lesson.name : `ID: ${lessonId}`;
@@ -311,8 +356,8 @@ export default function Admin() {
     setQuesForm({
       ...quesForm,
       category_id,
-      // Reset lesson_id nếu danh mục thay đổi
-      lesson_id: category_id === quesForm.category_id ? quesForm.lesson_id : "",
+      // Reset bài học khi thay đổi danh mục
+      lesson_id: "",
     });
   };
 
@@ -324,7 +369,7 @@ export default function Admin() {
     setQuesForm({
       ...quesForm,
       lesson_id,
-      // Tự động cập nhật danh mục nếu có bài học
+      // Cập nhật danh mục tương ứng
       category_id: lesson ? lesson.category_id : quesForm.category_id,
     });
   };
@@ -338,7 +383,12 @@ export default function Admin() {
         margin: "0 auto",
       }}
     >
+      {/* Container hiển thị thông báo */}
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <h1>📋 Quản trị hệ thống</h1>
+
+      {/* Thanh chuyển tab */}
       <div style={{ margin: "20px 0", display: "flex", gap: 10 }}>
         <button
           onClick={() => setTab("categories")}
@@ -380,10 +430,13 @@ export default function Admin() {
           Câu hỏi
         </button>
       </div>
-      {/* Categories Tab */}
+
+      {/* ===== TAB DANH MỤC ===== */}
       {tab === "categories" && (
         <div>
           <h2>Quản lý danh mục</h2>
+
+          {/* Form thêm/sửa danh mục */}
           <div
             style={{
               marginBottom: 20,
@@ -433,6 +486,7 @@ export default function Admin() {
             )}
           </div>
 
+          {/* Tìm kiếm danh mục */}
           <div style={{ marginBottom: 15 }}>
             <label style={{ fontWeight: "bold" }}>Tìm kiếm: </label>
             <input
@@ -443,6 +497,7 @@ export default function Admin() {
             />
           </div>
 
+          {/* Bảng danh sách danh mục */}
           <table
             border="1"
             cellPadding="8"
@@ -507,6 +562,7 @@ export default function Admin() {
             </tbody>
           </table>
 
+          {/* Phân trang */}
           <div
             style={{
               marginTop: 20,
@@ -557,10 +613,13 @@ export default function Admin() {
           </div>
         </div>
       )}
-      {/* Lessons Tab */}
+
+      {/* ===== TAB BÀI HỌC ===== */}
       {tab === "lessons" && (
         <div>
           <h2>Quản lý bài học</h2>
+
+          {/* Form thêm/sửa bài học */}
           <div
             style={{
               marginBottom: 20,
@@ -572,6 +631,7 @@ export default function Admin() {
               gap: 15,
             }}
           >
+            {/* Các trường thông tin bài học */}
             <div>
               <label
                 style={{
@@ -753,7 +813,7 @@ export default function Admin() {
             </div>
           </div>
 
-          {/* New filter section for lessons */}
+          {/* Bộ lọc và tìm kiếm bài học */}
           <div
             style={{
               marginBottom: 15,
@@ -773,7 +833,7 @@ export default function Admin() {
                 style={{ padding: 8, width: 300 }}
                 placeholder="Tìm kiếm bài học..."
               />
-            </div>{" "}
+            </div>
             <div>
               <label style={{ fontWeight: "bold", marginRight: 5 }}>
                 Lọc theo danh mục:{" "}
@@ -793,6 +853,7 @@ export default function Admin() {
             </div>
           </div>
 
+          {/* Bảng danh sách bài học */}
           <table
             border="1"
             cellPadding="8"
@@ -867,6 +928,7 @@ export default function Admin() {
             </tbody>
           </table>
 
+          {/* Phân trang */}
           <div
             style={{
               marginTop: 20,
@@ -917,10 +979,13 @@ export default function Admin() {
           </div>
         </div>
       )}
-      {/* Questions Tab */}
+
+      {/* ===== TAB CÂU HỎI ===== */}
       {tab === "questions" && (
         <div>
           <h2>Quản lý câu hỏi</h2>
+
+          {/* Form thêm/sửa câu hỏi */}
           <div
             style={{
               marginBottom: 20,
@@ -932,7 +997,7 @@ export default function Admin() {
               gap: 15,
             }}
           >
-            {/* Thêm trường chọn danh mục */}
+            {/* Trường chọn danh mục (dùng để lọc bài học) */}
             <div>
               <label
                 style={{
@@ -957,6 +1022,7 @@ export default function Admin() {
               </select>
             </div>
 
+            {/* Trường chọn bài học (chỉ hiển thị bài học thuộc danh mục đã chọn) */}
             <div>
               <label
                 style={{
@@ -981,6 +1047,7 @@ export default function Admin() {
               </select>
             </div>
 
+            {/* Các trường thông tin câu hỏi */}
             <div>
               <label
                 style={{
@@ -1023,6 +1090,7 @@ export default function Admin() {
               </select>
             </div>
 
+            {/* Trường URL hình ảnh (chỉ hiển thị khi chọn kiểu hình ảnh) */}
             {quesForm.question_type === "image" && (
               <div>
                 <label
@@ -1067,6 +1135,7 @@ export default function Admin() {
               </select>
             </div>
 
+            {/* Các lựa chọn trả lời */}
             <div style={{ gridColumn: "1 / -1" }}>
               <h3 style={{ marginBottom: 10 }}>Đáp án:</h3>
               <div
@@ -1099,6 +1168,7 @@ export default function Admin() {
               </div>
             </div>
 
+            {/* Chọn đáp án đúng */}
             <div>
               <label
                 style={{
@@ -1125,6 +1195,7 @@ export default function Admin() {
               </select>
             </div>
 
+            {/* Nút submit và hủy */}
             <div
               style={{
                 gridColumn: "1 / -1",
@@ -1159,6 +1230,7 @@ export default function Admin() {
                       question_type: "text",
                       answer_type: "text",
                       image_url: "",
+                      category_id: "", // Reset cả danh mục
                     })
                   }
                   style={{
@@ -1177,7 +1249,7 @@ export default function Admin() {
             </div>
           </div>
 
-          {/* New filter section for questions */}
+          {/* Bộ lọc và tìm kiếm câu hỏi */}
           <div
             style={{
               marginBottom: 15,
@@ -1197,7 +1269,7 @@ export default function Admin() {
                 style={{ padding: 8, width: 300 }}
                 placeholder="Tìm kiếm câu hỏi..."
               />
-            </div>{" "}
+            </div>
             <div>
               <label style={{ fontWeight: "bold", marginRight: 5 }}>
                 Lọc theo danh mục:{" "}
@@ -1243,6 +1315,7 @@ export default function Admin() {
             </div>
           </div>
 
+          {/* Bảng danh sách câu hỏi */}
           <table
             border="1"
             cellPadding="8"
@@ -1313,6 +1386,7 @@ export default function Admin() {
             </tbody>
           </table>
 
+          {/* Phân trang */}
           <div
             style={{
               marginTop: 20,

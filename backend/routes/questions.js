@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const conn = require("../db");
 
-// API cũ: lấy câu hỏi theo lesson_id đơn giản
+// API: lấy câu hỏi theo lesson_id đơn giản
 router.get("/", (req, res) => {
   const { lesson_id } = req.query;
 

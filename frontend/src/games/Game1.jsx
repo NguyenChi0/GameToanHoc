@@ -277,11 +277,9 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
   const [feedback, setFeedback] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
-<<<<<<< HEAD
-  const username = localStorage.getItem('username');
-=======
+
   const username = localStorage.getItem("username"); // Giả sử username được lưu trong localStorage
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
+
 
   const saveScore = async (additionalScore) => {
     console.log(`Đang lưu điểm: ${additionalScore}`);
@@ -295,11 +293,8 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
         body: JSON.stringify({
           username: username,
           score: additionalScore,
-<<<<<<< HEAD
-          action: 'add'
-=======
+
           action: "add", // Thêm điểm vào điểm hiện có
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
         }),
       });
 
@@ -315,17 +310,14 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
   };
 
   const endGame = async () => {
-<<<<<<< HEAD
-    if (window.confirm("Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại.")) {
-      const finalScore = score * 10;
-=======
+
     if (
       window.confirm(
         "Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại."
       )
     ) {
       const finalScore = score * 10; // Giả sử mỗi câu đúng được 10 điểm
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
+
       await saveScore(finalScore);
       navigate("..");
     }
@@ -344,7 +336,7 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     // Bỏ alert, để celebration tự nói lên tất cả
   };
 
-<<<<<<< HEAD
+
   const resetGame = () => {
     setCurrentIndex(0);
     setScore(0);
@@ -353,11 +345,11 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     setIsCompleted(false);
     setFeedback("");
     setIsAnimating(false);
-=======
+
     alert(
       `🎉 Bạn đã hoàn thành bài học! Tổng điểm: ${finalScore + bonusPoints}`
     );
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
+
   };
 
   useEffect(() => {
@@ -497,103 +489,60 @@ const getOperationEmoji = (operation) => {
   };
 
   if (isCompleted) {
-    return (
-      <CompletedContainer>
-        <CelebrationBackground>
-          {createConfetti()}
-        </CelebrationBackground>
-        
-        <CompletedCard>
-<<<<<<< HEAD
-          <TrophyIcon>🏆</TrophyIcon>
-          <CelebrationTitle>
-            CHÚC MỪNG!
-          </CelebrationTitle>
-          <p style={{ color: "#4b5563", fontSize: "18px", marginBottom: "24px" }}>
-            {getCelebrationMessage()}
-          </p>
+  return (
+    <CompletedContainer>
+      <CelebrationBackground>
+        {createConfetti()}
+      </CelebrationBackground>
+      
+      <CompletedCard>
+        <TrophyIcon>🏆</TrophyIcon>
+        <CelebrationTitle>
+          CHÚC MỪNG!
+        </CelebrationTitle>
+        <p style={{ color: "#4b5563", fontSize: "18px", marginBottom: "24px" }}>
+          {getCelebrationMessage()}
+        </p>
 
-          <ScoreDisplay>
-            <Sparkle delay="0s" style={{ top: '10px', left: '10px' }} />
-            <Sparkle delay="0.5s" style={{ top: '20px', right: '20px' }} />
-            <Sparkle delay="1s" style={{ bottom: '10px', left: '30px' }} />
-            <Sparkle delay="1.5s" style={{ bottom: '20px', right: '10px' }} />
-            
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
-              <span style={{ fontSize: "48px", marginRight: "12px" }}>⭐</span>
-              <span style={{ fontSize: "36px", fontWeight: "bold", color: "#1f2937" }}>
-=======
-          <div style={{ marginBottom: "24px" }}>
-            <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏆</div>
-            <h2
-              style={{
-                fontSize: "30px",
-                fontWeight: "bold",
-                color: "#1f2937",
-                marginBottom: "8px",
-              }}
-            >
-              🎉 Hoàn thành!
-            </h2>
-            <p style={{ color: "#4b5563" }}>Bạn đã hoàn thành bài học</p>
+        <ScoreDisplay>
+          <Sparkle delay="0s" style={{ top: '10px', left: '10px' }} />
+          <Sparkle delay="0.5s" style={{ top: '20px', right: '20px' }} />
+          <Sparkle delay="1s" style={{ bottom: '10px', left: '30px' }} />
+          <Sparkle delay="1.5s" style={{ bottom: '20px', right: '10px' }} />
+          
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+            <span style={{ fontSize: "48px", marginRight: "12px" }}>⭐</span>
+            <span style={{ fontSize: "36px", fontWeight: "bold", color: "#1f2937" }}>
+              {score}/{questions.length}
+            </span>
           </div>
-
-          <div
-            style={{
-              background: "linear-gradient(to right, #fefce8, #ffedd5)",
-              borderRadius: "16px",
-              padding: "24px",
-              marginBottom: "24px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: "16px",
-              }}
-            >
-              <span style={{ fontSize: "36px", marginRight: "8px" }}>⭐</span>
-              <span
-                style={{
-                  fontSize: "24px",
-                  fontWeight: "bold",
-                  color: "#1f2937",
-                }}
-              >
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
-                {score}/{questions.length}
-              </span>
-            </div>
-            
-            <div style={{ fontSize: "16px", color: "#4b5563", marginBottom: "8px" }}>
-              Tỉ lệ chính xác: {Math.round((score / questions.length) * 100)}%
-            </div>
-            
-            <div style={{ fontSize: "20px", fontWeight: "bold", color: "#d63031" }}>
-              Điểm số: {score * 10} điểm
-            </div>
-          </ScoreDisplay>
-
-          <div style={{ marginBottom: "24px" }}>
-            <div style={{ fontSize: "48px", marginBottom: "8px" }}>
-              {score === questions.length ? "🎊🎉🎊" : 
-               score >= questions.length * 0.8 ? "🎉🎈🎉" : 
-               score >= questions.length * 0.6 ? "🎈👏🎈" : "💪🌟💪"}
-            </div>
-            <p style={{ fontSize: "16px", color: "#6b7280" }}>
-              Bạn đã hoàn thành bài học "{lessonInfo.lesson_name}"
-            </p>
+          
+          <div style={{ fontSize: "16px", color: "#4b5563", marginBottom: "8px" }}>
+            Tỉ lệ chính xác: {Math.round((score / questions.length) * 100)}%
           </div>
+          
+          <div style={{ fontSize: "20px", fontWeight: "bold", color: "#d63031" }}>
+            Điểm số: {score * 10} điểm
+          </div>
+        </ScoreDisplay>
 
-          <RetryButton onClick={resetGame}>
-            🔄 Làm lại để đạt điểm cao hơn
-          </RetryButton>
-        </CompletedCard>
-      </CompletedContainer>
-    );
-  }
+        <div style={{ fontSize: "48px", marginBottom: "8px" }}>
+          {score === questions.length ? "🎊🎉🎊" : 
+           score >= questions.length * 0.8 ? "🎉🎈🎉" : 
+           score >= questions.length * 0.6 ? "🎈👏🎈" : "💪🌟💪"}
+        </div>
+        <p style={{ fontSize: "16px", color: "#6b7280" }}>
+          Bạn đã hoàn thành bài học "{lessonInfo.lesson_name}"
+        </p>
+
+        <RetryButton onClick={resetGame}>
+          🔄 Làm lại để đạt điểm cao hơn
+        </RetryButton>
+      </CompletedCard>
+    </CompletedContainer>
+  );
+}
+
 
   return (
     <Container>

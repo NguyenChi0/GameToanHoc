@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 import Game1 from "../games/Game1";
 import Game2 from "../games/Game2";
 import Game3 from "../games/Game3";
-
+import Game4 from "../games/Game4";
 function GamePage() {
   const location = useLocation();
   const { lessonId, lessonName, operation, level } = location.state || {};
@@ -14,7 +14,7 @@ function GamePage() {
 
   useEffect(() => {
     // Random 1 trong 3 kiểu giao diện: 0 → Game1, 1 → Game2, 2 → Game3
-    const randomIndex = Math.floor(Math.random() * 3);
+    const randomIndex = Math.floor(Math.random() * 4);
     setStyleIndex(randomIndex);
   }, []);
 
@@ -32,6 +32,8 @@ function GamePage() {
       return <Game2 {...gameProps} />;
     case 2:
       return <Game3 {...gameProps} />;
+    case 3:
+      return <Game4 {...gameProps} />;
     default:
       return <p>Không có giao diện phù hợp</p>;
   }

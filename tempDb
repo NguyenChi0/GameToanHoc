@@ -5,10 +5,10 @@ USE gametoanhoc;
 -- 2. Bảng tài khoản người chơi
 CREATE TABLE taikhoan (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    score INT DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    username VARCHAR(100) UNIQUE NOT NULL, 		  -- Tên đăng nhập, không được trùng
+    password VARCHAR(255) NOT NULL,  			  -- Mật khẩu (sẽ được mã hóa)
+    score INT DEFAULT 0,							-- Tổng điểm hiện tại
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP	-- Ngày tạo tài khoản
 );
 
 -- 3. Bảng danh mục phép toán
@@ -20,47 +20,47 @@ CREATE TABLE categories (
 -- 4. Bảng bài học
 CREATE TABLE lessons (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    category_id INT,
-    name VARCHAR(100) NOT NULL,      -- VD: "Tổng trong phạm vi 10"
+    category_id INT,  				-- Khóa ngoại liên kết đến bảng categories
+    name VARCHAR(100) NOT NULL,      -- Tên bài học, VD: "Tổng trong phạm vi 10"
     required_score INT DEFAULT 0,    -- Điểm cần để mở bài này
     operation VARCHAR(50),     -- VD: 'cộng' 'trừ' 'nhân' 'chia' 'hỗn hợp'
     level INT DEFAULT 1,       -- Mức độ bài học (1 chữ số, 2 chữ số,...)
-    type VARCHAR(20) DEFAULT 'số học', -- 'số học' hoặc 'thị giác'
-    FOREIGN KEY (category_id) REFERENCES categories(id)
+    type VARCHAR(20) DEFAULT 'số học', -- Loại bài học, 'số học' hoặc 'thị giác'
+    FOREIGN KEY (category_id) REFERENCES categories(id)  -- ràng buộc khóa ngoại
 );
 
 -- 5. Bảng kết quả học
 CREATE TABLE lesson_results (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    taikhoan_id INT,
-    lesson_id INT,
-    total_questions INT,       -- Tổng số câu
+    taikhoan_id INT,			-- id người chơi 
+    lesson_id INT,				-- id bài học
+    total_questions INT,       -- Tổng số câu hỏi trong lượt chơi
     correct_answers INT,       -- Số câu đúng
-    total_score INT,           -- Tổng điểm
-    played_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id),
+    total_score INT,           -- Tổng điểm đạt được trong lượt chơi đó
+    played_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- thời điểm chơi bài học
+    FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id), 
     FOREIGN KEY (lesson_id) REFERENCES lessons(id)
 );
 
 -- (Tùy chọn) 6. Bảng các bài học đã được mở khóa
 CREATE TABLE unlocked_lessons (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    taikhoan_id INT,
-    lesson_id INT,
-    unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    taikhoan_id INT,	-- id người chơi
+    lesson_id INT,		-- id bài học đã mở khóa
+    unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,		-- thời điểm mở khóa
     FOREIGN KEY (taikhoan_id) REFERENCES taikhoan(id),
     FOREIGN KEY (lesson_id) REFERENCES lessons(id)
 );
 
 CREATE TABLE questions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    lesson_id INT NOT NULL,
-    content VARCHAR(255) NOT NULL,        -- Câu hỏi hiển thị, ví dụ: (5 + 3) × 2
-    correct_answer VARCHAR(50) NOT NULL,  -- Đáp án đúng
-    options JSON NOT NULL,                -- Danh sách lựa chọn (dạng JSON array)
-	question_type ENUM('text', 'image') DEFAULT 'text',   -- loại câu hỏi (văn bản hay hình ảnh)
-    answer_type ENUM('text', 'image') DEFAULT 'text',  -- loại đáp án: text hay ảnh
-    image_url VARCHAR(255), 							-- ảnh minh họa cho câu hỏi (nếu có)
+    lesson_id INT NOT NULL,								    -- bài học tương ứng với câu hỏi
+    content VARCHAR(255) NOT NULL,        				    -- Câu hỏi hiển thị, ví dụ: (5 + 3) × 2
+    correct_answer VARCHAR(50) NOT NULL,  				    -- Đáp án đúng
+    options JSON NOT NULL,                					-- Danh sách lựa chọn (dạng JSON array)
+	question_type ENUM('text', 'image') DEFAULT 'text',     -- loại câu hỏi (văn bản hay hình ảnh)
+    answer_type ENUM('text', 'image') DEFAULT 'text',       -- loại đáp án: text hay ảnh
+    image_url VARCHAR(255), 							    -- ảnh minh họa cho câu hỏi (nếu có)
     FOREIGN KEY (lesson_id) REFERENCES lessons(id)
 );
 

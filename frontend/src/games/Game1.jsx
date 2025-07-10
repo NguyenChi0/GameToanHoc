@@ -72,37 +72,20 @@ const AnswerButton = styled.button`
   transition: all 0.3s ease;
   transform: ${(props) => (props.isAnimating ? "scale(1.05)" : "scale(1)")};
   background: ${(props) =>
-    props.isCorrect
-      ? "#f0fff4"
-      : props.isWrong
-      ? "#fef2f2"
-      : "#f9fafb"};
+    props.isCorrect ? "#f0fff4" : props.isWrong ? "#fef2f2" : "#f9fafb"};
   color: ${(props) =>
-    props.isCorrect
-      ? "#15803d"
-      : props.isWrong
-      ? "#b91c1c"
-      : "#374151"};
+    props.isCorrect ? "#15803d" : props.isWrong ? "#b91c1c" : "#374151"};
   border: 2px solid
     ${(props) =>
-      props.isCorrect
-        ? "#4ade80"
-        : props.isWrong
-        ? "#f87171"
-        : "#e5e7eb"};
-  cursor: ${(props) =>
-    props.disabled ? "not-allowed" : "pointer"};
+      props.isCorrect ? "#4ade80" : props.isWrong ? "#f87171" : "#e5e7eb"};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   &:hover {
     transform: scale(1.05);
     border-color: ${(props) =>
-      !props.disabled && !props.isCorrect && !props.isWrong
-        ? "#93c5fd"
-        : ""};
+      !props.disabled && !props.isCorrect && !props.isWrong ? "#93c5fd" : ""};
     background: ${(props) =>
-      !props.disabled && !props.isCorrect && !props.isWrong
-        ? "#eff6ff"
-        : ""};
+      !props.disabled && !props.isCorrect && !props.isWrong ? "#eff6ff" : ""};
   }
 `;
 
@@ -155,7 +138,7 @@ const EndGameButton = styled.button`
   bottom: 20px;
   right: 20px;
   padding: 10px 20px;
-  background-color: #FF5252;
+  background-color: #ff5252;
   color: white;
   border: none;
   border-radius: 5px;
@@ -166,7 +149,7 @@ const EndGameButton = styled.button`
   transition: all 0.3s;
 
   &:hover {
-    background-color: #FF0000;
+    background-color: #ff0000;
     transform: scale(1.05);
   }
 `;
@@ -182,40 +165,44 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
   const [feedback, setFeedback] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
-  const username = localStorage.getItem('username'); // Giả sử username được lưu trong localStorage
+  const username = localStorage.getItem("username"); // Giả sử username được lưu trong localStorage
 
   const saveScore = async (additionalScore) => {
     console.log(`Đang lưu điểm: ${additionalScore}`);
 
     try {
-      const response = await fetch('http://localhost:5000/api/score/save', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/score/save", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username: username,
           score: additionalScore,
-          action: 'add' // Thêm điểm vào điểm hiện có
+          action: "add", // Thêm điểm vào điểm hiện có
         }),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Lỗi khi lưu điểm');
+        throw new Error(data.message || "Lỗi khi lưu điểm");
       }
       return data;
     } catch (error) {
-      console.error('Lỗi khi lưu điểm:', error);
+      console.error("Lỗi khi lưu điểm:", error);
       return null;
     }
   };
 
   const endGame = async () => {
-    if (window.confirm("Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại.")) {
+    if (
+      window.confirm(
+        "Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại."
+      )
+    ) {
       const finalScore = score * 10; // Giả sử mỗi câu đúng được 10 điểm
       await saveScore(finalScore);
-      navigate('..');
+      navigate("..");
     }
   };
 
@@ -233,7 +220,9 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
 
     await saveScore(bonusPoints);
 
-    alert(`🎉 Bạn đã hoàn thành bài học! Tổng điểm: ${finalScore + bonusPoints}`);
+    alert(
+      `🎉 Bạn đã hoàn thành bài học! Tổng điểm: ${finalScore + bonusPoints}`
+    );
   };
 
   useEffect(() => {
@@ -361,7 +350,14 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
         <CompletedCard>
           <div style={{ marginBottom: "24px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏆</div>
-            <h2 style={{ fontSize: "30px", fontWeight: "bold", color: "#1f2937", marginBottom: "8px" }}>
+            <h2
+              style={{
+                fontSize: "30px",
+                fontWeight: "bold",
+                color: "#1f2937",
+                marginBottom: "8px",
+              }}
+            >
               🎉 Hoàn thành!
             </h2>
             <p style={{ color: "#4b5563" }}>Bạn đã hoàn thành bài học</p>
@@ -375,9 +371,22 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
               marginBottom: "24px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: "16px",
+              }}
+            >
               <span style={{ fontSize: "36px", marginRight: "8px" }}>⭐</span>
-              <span style={{ fontSize: "24px", fontWeight: "bold", color: "#1f2937" }}>
+              <span
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "bold",
+                  color: "#1f2937",
+                }}
+              >
                 {score}/{questions.length}
               </span>
             </div>
@@ -414,10 +423,18 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
               <div style={{ fontSize: "30px" }}>📚</div>
               <div>
                 <Title>{lessonInfo.lesson_name}</Title>
-                <p style={{ color: "#4b5563", display: "flex", alignItems: "center" }}>
+                <p
+                  style={{
+                    color: "#4b5563",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
                   <span style={{ marginRight: "8px" }}>🎯</span>
-                  Phép toán: <span style={{ fontWeight: "600", marginLeft: "4px" }}>
-                    {getSymbol(lessonInfo.operation)} {getOperationEmoji(lessonInfo.operation)}
+                  Phép toán:{" "}
+                  <span style={{ fontWeight: "600", marginLeft: "4px" }}>
+                    {getSymbol(lessonInfo.operation)}{" "}
+                    {getOperationEmoji(lessonInfo.operation)}
                   </span>
                   <span
                     style={{
@@ -436,7 +453,13 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: "14px", color: "#6b7280" }}>Điểm số</div>
-              <div style={{ fontSize: "24px", fontWeight: "bold", color: "#2563eb" }}>
+              <div
+                style={{
+                  fontSize: "24px",
+                  fontWeight: "bold",
+                  color: "#2563eb",
+                }}
+              >
                 {score}/{questions.length}
               </div>
             </div>
@@ -449,7 +472,9 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
               style={{ width: `${progressPercentage}%` }}
             />
           </ProgressBar>
-          <div style={{ textAlign: "center", fontSize: "14px", color: "#4b5563" }}>
+          <div
+            style={{ textAlign: "center", fontSize: "14px", color: "#4b5563" }}
+          >
             Câu hỏi {currentIndex + 1} / {questions.length}
           </div>
         </Card>
@@ -458,12 +483,22 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
         <QuestionCard>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
             <QuestionContent color={getOperationColor(lessonInfo.operation)}>
-              <span style={{ fontSize: "36px", fontWeight: "bold" }}>{question.content}</span>
+              <span style={{ fontSize: "36px", fontWeight: "bold" }}>
+                {question.content}
+              </span>
             </QuestionContent>
           </div>
 
           {/* Answer Options */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", maxWidth: "512px", margin: "0 auto" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "16px",
+              maxWidth: "512px",
+              margin: "0 auto",
+            }}
+          >
             {question.options.map((option, idx) => {
               const isSelected = selectedAnswer === option;
               const isCorrect = option === question.correct_answer;
@@ -479,14 +514,30 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
                   isCorrect={showCorrect}
                   isWrong={isWrong}
                 >
-                  <span style={{ position: "relative", zIndex: 10 }}>{option}</span>
+                  <span style={{ position: "relative", zIndex: 10 }}>
+                    {option}
+                  </span>
                   {showCorrect && (
-                    <div style={{ position: "absolute", top: "8px", right: "8px", fontSize: "24px" }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "8px",
+                        right: "8px",
+                        fontSize: "24px",
+                      }}
+                    >
                       ✅
                     </div>
                   )}
                   {isWrong && (
-                    <div style={{ position: "absolute", top: "8px", right: "8px", fontSize: "24px" }}>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "8px",
+                        right: "8px",
+                        fontSize: "24px",
+                      }}
+                    >
                       ❌
                     </div>
                   )}
@@ -502,8 +553,23 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
                 {feedback}
               </Feedback>
               {currentIndex < questions.length - 1 && (
-                <div style={{ marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "center", color: "#4b5563" }}>
-                  <span style={{ marginRight: "8px", animation: "pulse 1s infinite" }}>➡️</span>
+                <div
+                  style={{
+                    marginTop: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#4b5563",
+                  }}
+                >
+                  <span
+                    style={{
+                      marginRight: "8px",
+                      animation: "pulse 1s infinite",
+                    }}
+                  >
+                    ➡️
+                  </span>
                   <span>Tự động chuyển câu tiếp theo...</span>
                 </div>
               )}

@@ -338,19 +338,18 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
 
 
   const resetGame = () => {
-    setCurrentIndex(0);
-    setScore(0);
-    setSelectedAnswer(null);
-    setShowResult(false);
-    setIsCompleted(false);
-    setFeedback("");
-    setIsAnimating(false);
+  setCurrentIndex(0);
+  setScore(0);
+  setSelectedAnswer(null);
+  setShowResult(false);
+  setIsCompleted(false);
+  setFeedback("");
+  setIsAnimating(false);
 
-    alert(
-      `🎉 Bạn đã hoàn thành bài học! Tổng điểm: ${finalScore + bonusPoints}`
-    );
+  // Có thể thêm thông báo đơn giản nếu bạn thích:
+  // alert("Bắt đầu lại bài học!");
+};
 
-  };
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
@@ -615,9 +614,14 @@ const getOperationEmoji = (operation) => {
         <QuestionCard>
           <div style={{ textAlign: "center", marginBottom: "32px" }}>
             <QuestionContent color={getOperationColor(lessonInfo.operation)}>
-              <span style={{ fontSize: "36px", fontWeight: "bold" }}>
-                {question.content}
-              </span>
+              {question.is_image ? (
+  <img src={question.content} alt="câu hỏi" style={{ maxWidth: "100%" }} />
+) : (
+  <span style={{ fontSize: "36px", fontWeight: "bold" }}>
+    {question.content}
+  </span>
+)}
+
             </QuestionContent>
           </div>
 
@@ -647,7 +651,12 @@ const getOperationEmoji = (operation) => {
                   isWrong={isWrong}
                 >
                   <span style={{ position: "relative", zIndex: 10 }}>
-                    {option}
+                    {question.options_is_image ? (
+  <img src={option} alt="đáp án" style={{ maxWidth: "100%", height: "60px" }} />
+) : (
+  <span style={{ position: "relative", zIndex: 10 }}>{option}</span>
+)}
+
                   </span>
                   {showCorrect && (
                     <div

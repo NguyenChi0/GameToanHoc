@@ -169,13 +169,27 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
       }
 
       if (questions[currentIndex]) {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(0, 20, canvas.width, 60);
-        ctx.fillStyle = "white";
-        ctx.font = "bold 32px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(questions[currentIndex].content, canvas.width / 2, 60);
-      }
+  const question = questions[currentIndex];
+  if (question.question_type === "image") {
+    const img = new Image();
+    img.src = `/images/${question.content}`;
+    img.onload = () => {
+      const imgWidth = 200;
+      const imgHeight = 100;
+      const x = canvas.width / 2 - imgWidth / 2;
+      const y = 30;
+      ctx.drawImage(img, x, y, imgWidth, imgHeight);
+    };
+  } else {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.fillRect(0, 20, canvas.width, 60);
+    ctx.fillStyle = "white";
+    ctx.font = "bold 32px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(question.content, canvas.width / 2, 60);
+  }
+}
+
 
       if (imagesRef.current.basket.complete && imagesRef.current.basket.naturalWidth > 0) {
         ctx.drawImage(imagesRef.current.basket, basket.x, basket.y, basket.width, basket.height);

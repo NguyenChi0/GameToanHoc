@@ -41,7 +41,7 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     console.log(`Đang lưu điểm: ${additionalScore}`);
 
     try {
-      const response = await fetch('http://localhost:5000/api/score/save', {
+      const response = await fetch('http://210.245.52.119/api_gametoanhoc/api/score/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,9 +79,10 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     background: new Image(),
   };
 
-  images.apple.src = "/images/apple.png";
-  images.basket.src = "/images/socket.png";
-  images.background.src = "/images/background.png";
+  images.apple.src = "/gametinhtoan/images/apple.png";
+
+  images.basket.src = "/gametinhtoan/images/socket.png";
+  images.background.src = "/gametinhtoan/images/background.png";
 
   imagesRef.current = images;
 };
@@ -90,7 +91,7 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
   }, []);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
+    fetch(`http://210.245.52.119/api_gametoanhoc/api/questions/lesson/${lessonId}`)
       .then((res) => res.json())
       .then((data) => {
         setQuestions(data.questions);
@@ -172,7 +173,8 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
   const question = questions[currentIndex];
   if (question.question_type === "image") {
     const img = new Image();
-    img.src = `/images/${question.content}`;
+    img.src = `/gametinhtoan/images/${question.content}`;
+
     img.onload = () => {
       const imgWidth = 200;
       const imgHeight = 100;

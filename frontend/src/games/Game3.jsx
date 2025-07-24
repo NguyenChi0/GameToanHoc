@@ -3,7 +3,7 @@ import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
 
 
-const BALLOON_IMAGES = ['/images/balloon1.png', '/images/balloon2.png', '/images/balloon3.png', '/images/balloon.png'];
+const BALLOON_IMAGES = ['/gametinhtoan/images/balloon1.png', '/gametinhtoan/images/balloon2.png', '/gametinhtoan/images/balloon3.png', '/gametinhtoan/images/balloon.png'];
 
 // Tạo animation bay ngẫu nhiên
 const floatUp = (startPos) => keyframes`
@@ -31,7 +31,7 @@ const floatUp = (startPos) => keyframes`
 const GameContainer = styled.div`
   width: 100%;
   height: 100vh;
-  background-image: url('/images/sky.png');
+  background-image: url('/gametinhtoan/images/sky.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
@@ -174,7 +174,7 @@ export default function Game3({ lessonId }) {
   const username = localStorage.getItem('username');
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
+    fetch(`http://210.245.52.119/api_gametoanhoc/api/questions/lesson/${lessonId}`)
       .then((res) => res.json())
       .then((data) => {
         setQuestions(data.questions);
@@ -185,7 +185,7 @@ export default function Game3({ lessonId }) {
 
   const saveScore = async (additionalScore) => {
     try {
-      const res = await fetch('http://localhost:5000/api/score/save', {
+      const res = await fetch('http://210.245.52.119/api_gametoanhoc/api/score/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, score: additionalScore, action: 'add' })
@@ -263,7 +263,7 @@ export default function Game3({ lessonId }) {
         <ScoreDisplay>Điểm: {score}</ScoreDisplay>
         <QuestionBox>
           {question.question_type === "image" ? (
-            <img src={`/images/${question.content}`} alt="question" style={{ maxWidth: '280px' }} />
+            <img src={`/gametinhtoan/images/${question.content}`} alt="question" style={{ maxWidth: '280px' }} />
           ) : (
             question.content
           )}
@@ -288,7 +288,7 @@ export default function Game3({ lessonId }) {
               onClick={() => handleAnswer(option)}
             >
               {question.answer_type === "image" ? (
-                <img src={`/images/${option}`} alt={`option-${index}`} style={{ maxWidth: "60px" }} />
+                <img src={`/gametinhtoan/images/${option}`} alt={`option-${index}`} style={{ maxWidth: "60px" }} />
               ) : (
                 option
               )}

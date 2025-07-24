@@ -285,7 +285,7 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     console.log(`Đang lưu điểm: ${additionalScore}`);
 
     try {
-      const response = await fetch("http://localhost:5000/api/score/save", {
+      const response = await fetch("http://210.245.52.119/api_gametoanhoc/api//score/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -352,7 +352,7 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
 
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
+    fetch(`http://210.245.52.119/api_gametoanhoc/api/questions/lesson/${lessonId}`)
       .then((res) => res.json())
       .then((data) => {
         setQuestions(data.questions);

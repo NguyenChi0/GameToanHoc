@@ -29,7 +29,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="gametoanhoc">
       <div style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
         <nav style={{ marginBottom: "1rem" }}>
           <Link to="/" style={{ marginRight: 10 }}>

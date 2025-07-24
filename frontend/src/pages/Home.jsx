@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../api"; // Đường dẫn đến file chứa axios.create (bạn có thể điều chỉnh lại đúng theo cấu trúc thư mục)
 
 export default function Home({ username }) {
   const [categories, setCategories] = useState([]);
@@ -11,28 +12,25 @@ export default function Home({ username }) {
 
   // Lấy danh mục phép toán
   useEffect(() => {
-    fetch("http://localhost:5000/api/categories")
-      .then((res) => res.json())
-      .then(setCategories)
+    API.get("/categories")
+      .then((res) => setCategories(res.data))
       .catch((err) => console.error("Lỗi lấy categories:", err));
   }, []);
 
   // Lấy bài học
   useEffect(() => {
-    fetch("http://localhost:5000/api/lessons")
-      .then((res) => res.json())
-      .then(setLessons)
+    API.get("/lessons")
+      .then((res) => setLessons(res.data))
       .catch((err) => console.error("Lỗi lấy lessons:", err));
   }, []);
 
-  // Lấy điểm
+  // Lấy điểm người dùng
   useEffect(() => {
     if (username) {
-      fetch(`http://localhost:5000/api/score/${username}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.score !== undefined) setScore(data.score);
-          else setError(data.message);
+      API.get(`/score/${username}`)
+        .then((res) => {
+          if (res.data.score !== undefined) setScore(res.data.score);
+          else setError(res.data.message);
         })
         .catch(() => setError("Lỗi khi lấy điểm"))
         .finally(() => setLoadingScore(false));
@@ -93,7 +91,6 @@ export default function Home({ username }) {
                   <div
                     key={lesson.id}
                     onClick={() => {
-                      // Chuyển sang GamePage để hiển thị game phù hợp
                       navigate(`/game/${lesson.id}`, {
                         state: {
                           lessonId: lesson.id,

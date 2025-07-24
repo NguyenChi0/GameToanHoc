@@ -38,7 +38,7 @@ export default function Game4({ lessonId }) {
   const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
+    fetch(`http://210.245.52.119/api_gametoanhoc/api/questions/lesson/${lessonId}`)
       .then((res) => res.json())
       .then((data) => setQuestions(data.questions))
       .catch((err) => console.error("Fetch error:", err));

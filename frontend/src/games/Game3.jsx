@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
+import API from "../api";
+
 
 // Màu sắc cho các bóng bay
 const BALLOON_COLORS = [
@@ -67,7 +69,6 @@ const QuestionBox = styled.div`
   transform: translateX(-50%);
   font-size: 32px;
   font-weight: bold;
-  background-image: url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');
   background-size: cover;
   background-position: center;
   color: white;
@@ -245,40 +246,31 @@ export default function Game3({ lessonId }) {
   // Sử dụng useRef để theo dõi điểm thực tế (không bị ảnh hưởng bởi React state batching)
   const actualScore = useRef(0);
 
-  useEffect(() => {
-    fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setQuestions(data.questions);
-        setLessonInfo(data.lessonInfo);
+useEffect(() => {
+    API.get(`/questions/lesson/${lessonId}`)
+      .then((res) => {
+        setQuestions(res.data.questions);
+        setLessonInfo(res.data.lessonInfo);
       })
       .catch((err) => console.error("Lỗi khi lấy câu hỏi:", err));
-  }, [lessonId]);
+}, [lessonId]);
 
-  const saveScore = async (additionalScore) => {
-    console.log(`Đang lưu điểm: ${additionalScore}`);
-    try {
-      const response = await fetch('http://localhost:5000/api/score/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          score: additionalScore,
-          action: 'add'
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Lỗi khi lưu điểm');
-      }
-      return data;
-    } catch (error) {
-      console.error('Lỗi khi lưu điểm:', error);
-      return null;
-    }
-  };
+
+const saveScore = async (additionalScore) => {
+  console.log(`Đang lưu điểm: ${additionalScore}`);
+  try {
+    const res = await API.post('/score/save', {
+      username,
+      score: additionalScore,
+      action: 'add'
+    });
+    return res.data; // axios đã parse JSON cho bạn
+  } catch (error) {
+    console.error('Lỗi khi lưu điểm:', error);
+    return null;
+  }
+};
+
 
   const handleAnswer = (answer) => {
     const question = questions[currentIndex];

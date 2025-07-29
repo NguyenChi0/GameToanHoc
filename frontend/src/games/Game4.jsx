@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import API from "../api"; // ✅ import axios instance
 
 const Container = styled.div`
   padding: 32px;
@@ -37,11 +38,11 @@ export default function Game4({ lessonId }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [feedback, setFeedback] = useState("");
 
+  // ✅ Lấy câu hỏi bằng axios
   useEffect(() => {
-    fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
-      .then((res) => res.json())
-      .then((data) => setQuestions(data.questions))
-      .catch((err) => console.error("Fetch error:", err));
+    API.get(`/questions/lesson/${lessonId}`)
+      .then((res) => setQuestions(res.data.questions))
+      .catch((err) => console.error("Lỗi lấy câu hỏi:", err));
   }, [lessonId]);
 
   if (questions.length === 0) return <Container>Đang tải câu hỏi...</Container>;
@@ -85,6 +86,7 @@ export default function Game4({ lessonId }) {
         ? "✅ Đúng rồi!"
         : `❌ Sai! Đáp án đúng là ${question.correct_answer}`
     );
+
     setTimeout(() => {
       setFeedback("");
       if (currentIndex < questions.length - 1) {

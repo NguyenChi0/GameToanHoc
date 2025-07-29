@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/gametoanhoc/static/css/main.3851d270.css",
+    "main.js": "/gametoanhoc/static/js/main.be1412b5.js",
+    "static/js/453.670e15c7.chunk.js": "/gametoanhoc/static/js/453.670e15c7.chunk.js",
+    "index.html": "/gametoanhoc/index.html",
+    "main.3851d270.css.map": "/gametoanhoc/static/css/main.3851d270.css.map",
+    "main.be1412b5.js.map": "/gametoanhoc/static/js/main.be1412b5.js.map",
+    "453.670e15c7.chunk.js.map": "/gametoanhoc/static/js/453.670e15c7.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3851d270.css",
+    "static/js/main.be1412b5.js"
+  ]
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { useNavigate } from "react-router-dom";
+import API from "../api"; // đường dẫn tuỳ folder của bạn
 
 // Keyframes for animations
 const confettiAnimation = keyframes`
@@ -229,6 +230,8 @@ const RetryButton = styled.button`
   border-radius: 12px;
   transition: all 0.2s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
   &:hover {
     background: linear-gradient(to right, #2563eb, #6d28d9);
     transform: scale(1.05);
@@ -277,55 +280,31 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
   const [feedback, setFeedback] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const navigate = useNavigate();
-<<<<<<< HEAD
-  const username = localStorage.getItem('username');
-=======
-  const username = localStorage.getItem("username"); // Giả sử username được lưu trong localStorage
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
 
-  const saveScore = async (additionalScore) => {
-    console.log(`Đang lưu điểm: ${additionalScore}`);
+  const username = localStorage.getItem("username");
 
-    try {
-      const response = await fetch("http://localhost:5000/api/score/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username,
-          score: additionalScore,
-<<<<<<< HEAD
-          action: 'add'
-=======
-          action: "add", // Thêm điểm vào điểm hiện có
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Lỗi khi lưu điểm");
-      }
-      return data;
-    } catch (error) {
-      console.error("Lỗi khi lưu điểm:", error);
-      return null;
-    }
-  };
+ const saveScore = async (additionalScore) => {
+  console.log(`Đang lưu điểm: ${additionalScore}`);
+  try {
+    const res = await API.post('/score/save', {
+      username,
+      score: additionalScore,
+      action: 'add'
+    });
+    return res.data; // axios đã parse JSON cho bạn
+  } catch (error) {
+    console.error('Lỗi khi lưu điểm:', error);
+    return null;
+  }
+};
 
   const endGame = async () => {
-<<<<<<< HEAD
-    if (window.confirm("Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại.")) {
-      const finalScore = score * 10;
-=======
     if (
       window.confirm(
         "Bạn có chắc muốn kết thúc game? Điểm của bạn sẽ được lưu lại."
       )
     ) {
-      const finalScore = score * 10; // Giả sử mỗi câu đúng được 10 điểm
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
+      const finalScore = score * 10;
       await saveScore(finalScore);
       navigate("..");
     }
@@ -333,18 +312,15 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
 
   const completeGame = async () => {
     setIsCompleted(true);
-    const finalScore = score * 10; // Chỉ tính điểm từ câu trả lời đúng
+    const finalScore = score * 10;
 
     console.log("📊 Tổng điểm:", finalScore);
 
     if (finalScore > 0) {
       await saveScore(finalScore);
     }
-
-    // Bỏ alert, để celebration tự nói lên tất cả
   };
 
-<<<<<<< HEAD
   const resetGame = () => {
     setCurrentIndex(0);
     setScore(0);
@@ -353,22 +329,17 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     setIsCompleted(false);
     setFeedback("");
     setIsAnimating(false);
-=======
-    alert(
-      `🎉 Bạn đã hoàn thành bài học! Tổng điểm: ${finalScore + bonusPoints}`
-    );
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
   };
 
-  useEffect(() => {
-    fetch(`http://localhost:5000/api/questions/lesson/${lessonId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setQuestions(data.questions);
-        setLessonInfo(data.lessonInfo);
-      })
-      .catch((err) => console.error("Lỗi khi lấy câu hỏi:", err));
-  }, [lessonId]);
+   useEffect(() => {
+  API.get(`/questions/lesson/${lessonId}`)
+    .then((res) => {
+      setQuestions(res.data.questions);
+      setLessonInfo(res.data.lessonInfo);
+    })
+    .catch((err) => console.error("Error fetching questions:", err));
+}, [lessonId]);
+
 
   // Create confetti pieces
   const createConfetti = () => {
@@ -387,6 +358,50 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     }
     
     return confettiPieces;
+  };
+
+  // Helper functions
+  const getSymbol = (operation) => {
+    switch (operation) {
+      case "cộng":      return "+";
+      case "trừ":       return "−";
+      case "nhân":      return "×";
+      case "chia":      return "÷";
+      case "hỗn hợp":   return "±";
+      default:          return "?";
+    }
+  };
+
+  const getOperationColor = (operation) => {
+    switch (operation) {
+      case "cộng":      return "#4ade80, #3b82f6";
+      case "trừ":       return "#f87171, #f472b6";
+      case "nhân":      return "#c084fc, #6366f1";
+      case "chia":      return "#fb923c, #ef4444";
+      case "hỗn hợp":   return "#2dd4bf, #22d3ee";
+      default:          return "#9ca3af, #6b7280";
+    }
+  };
+
+  const getOperationEmoji = (operation) => {
+    switch (operation) {
+      case "cộng":      return "➕";
+      case "trừ":       return "➖";
+      case "nhân":      return "✖️";
+      case "chia":      return "➗";
+      case "hỗn hợp":   return "🔄";
+      default:          return "🎯";
+    }
+  };
+
+  const getCelebrationMessage = () => {
+    const percentage = Math.round((score / questions.length) * 100);
+    if (percentage === 100) return "🌟 HOÀN HẢO! Bạn là thiên tài!";
+    if (percentage >= 90) return "🎊 XUẤT SẮC! Thật tuyệt vời!";
+    if (percentage >= 80) return "🎉 TỐT LẮM! Bạn đã làm rất tốt!";
+    if (percentage >= 70) return "👏 KHÁ TỐT! Tiếp tục cố gắng!";
+    if (percentage >= 60) return "👍 ĐƯỢC RỒI! Bạn đã cố gắng!";
+    return "💪 CỐ GẮNG HỌC THÊM! Bạn sẽ giỏi hơn!";
   };
 
   if (!lessonInfo || questions.length === 0) {
@@ -447,55 +462,6 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
     }, 500);
   };
 
-  // … trong Game1 component …
-
-// 1. Hiển thị ký hiệu
-const getSymbol = (operation) => {
-  switch (operation) {
-    case "cộng":      return "+";
-    case "trừ":       return "−";
-    case "nhân":      return "×";
-    case "chia":      return "÷";
-    case "hỗn hợp":   return "±";
-    default:          return "?";
-  }
-};
-
-// 2. Chọn màu sắc theo phép
-const getOperationColor = (operation) => {
-  switch (operation) {
-    case "cộng":      return "#4ade80, #3b82f6";   // xanh lá → xanh dương
-    case "trừ":       return "#f87171, #f472b6";   // đỏ → hồng
-    case "nhân":      return "#c084fc, #6366f1";   // tím nhạt → tím đậm
-    case "chia":      return "#fb923c, #ef4444";   // cam nhạt → cam đậm
-    case "hỗn hợp":   return "#2dd4bf, #22d3ee";   // xanh ngọc → xanh biển
-    default:          return "#9ca3af, #6b7280";   // xám
-  }
-};
-
-// 3. Emoji minh hoạ
-const getOperationEmoji = (operation) => {
-  switch (operation) {
-    case "cộng":      return "➕";
-    case "trừ":       return "➖";
-    case "nhân":      return "✖️";
-    case "chia":      return "➗";
-    case "hỗn hợp":   return "🔄";
-    default:          return "🎯";
-  }
-};
-
-
-  const getCelebrationMessage = () => {
-    const percentage = Math.round((score / questions.length) * 100);
-    if (percentage === 100) return "🌟 HOÀN HẢO! Bạn là thiên tài!";
-    if (percentage >= 90) return "🎊 XUẤT SẮC! Thật tuyệt vời!";
-    if (percentage >= 80) return "🎉 TỐT LẮM! Bạn đã làm rất tốt!";
-    if (percentage >= 70) return "👏 KHÁ TỐT! Tiếp tục cố gắng!";
-    if (percentage >= 60) return "👍 ĐƯỢC RỒI! Bạn đã cố gắng!";
-    return "💪 CỐ GẮNG HỌC THÊM! Bạn sẽ giỏi hơn!";
-  };
-
   if (isCompleted) {
     return (
       <CompletedContainer>
@@ -504,48 +470,15 @@ const getOperationEmoji = (operation) => {
         </CelebrationBackground>
         
         <CompletedCard>
-<<<<<<< HEAD
-          <TrophyIcon>🏆</TrophyIcon>
-          <CelebrationTitle>
-            CHÚC MỪNG!
-          </CelebrationTitle>
-          <p style={{ color: "#4b5563", fontSize: "18px", marginBottom: "24px" }}>
-            {getCelebrationMessage()}
-          </p>
-
-          <ScoreDisplay>
-            <Sparkle delay="0s" style={{ top: '10px', left: '10px' }} />
-            <Sparkle delay="0.5s" style={{ top: '20px', right: '20px' }} />
-            <Sparkle delay="1s" style={{ bottom: '10px', left: '30px' }} />
-            <Sparkle delay="1.5s" style={{ bottom: '20px', right: '10px' }} />
-            
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
-              <span style={{ fontSize: "48px", marginRight: "12px" }}>⭐</span>
-              <span style={{ fontSize: "36px", fontWeight: "bold", color: "#1f2937" }}>
-=======
           <div style={{ marginBottom: "24px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>🏆</div>
-            <h2
-              style={{
-                fontSize: "30px",
-                fontWeight: "bold",
-                color: "#1f2937",
-                marginBottom: "8px",
-              }}
-            >
-              🎉 Hoàn thành!
-            </h2>
+            <CelebrationTitle>
+              {getCelebrationMessage()}
+            </CelebrationTitle>
             <p style={{ color: "#4b5563" }}>Bạn đã hoàn thành bài học</p>
           </div>
 
-          <div
-            style={{
-              background: "linear-gradient(to right, #fefce8, #ffedd5)",
-              borderRadius: "16px",
-              padding: "24px",
-              marginBottom: "24px",
-            }}
-          >
+          <ScoreDisplay>
             <div
               style={{
                 display: "flex",
@@ -562,7 +495,6 @@ const getOperationEmoji = (operation) => {
                   color: "#1f2937",
                 }}
               >
->>>>>>> 90482692382abf4a8daafe6dbe91197bea0dc2bb
                 {score}/{questions.length}
               </span>
             </div>

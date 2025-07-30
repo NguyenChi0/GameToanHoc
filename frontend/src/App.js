@@ -13,6 +13,7 @@ import Dangky from "./pages/Dangky";
 import Admin from "./pages/Admin";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+// bổ sung thêm biến Router (path) để không phải chỉnh sửa nhiều. 
 
 function App() {
   const [username, setUsername] = useState(null);
@@ -37,7 +38,7 @@ function App() {
           </Link>
           {!username ? (
             <>
-              <Link to="/login" style={{ marginRight: 10 }}>
+              <Link to="/gametoanhoc/login" style={{ marginRight: 10 }}>
                 🔐 Đăng nhập
               </Link>
               <Link to="/register">📝 Đăng ký</Link>

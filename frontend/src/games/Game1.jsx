@@ -450,17 +450,16 @@ export default function Game1({ lessonId, lessonName, operation, level }) {
       setIsAnimating(false);
 
       setTimeout(() => {
-        if (currentIndex < questions.length - 1) {
-          setCurrentIndex(currentIndex + 1);
-          setSelectedAnswer(null);
-          setShowResult(false);
-          setFeedback("");
-        } else {
-          completeGame();
-        }
-      }, 2000);
-    }, 500);
-  };
+  if (currentIndex < questions.length - 1) {
+    setCurrentIndex(currentIndex + 1);
+    setSelectedAnswer(null);
+    setShowResult(false);
+    setFeedback("");
+  } else {
+    completeGame();
+  }
+}, 600); // Giảm từ 2000ms xuống 1000ms (1 giây)
+}, 100); }// Giảm từ 500ms xuống 300ms (0.3 giây)
 
   if (isCompleted) {
     return (
